@@ -11,6 +11,7 @@ var videoAspect = 1.0, canvasAspect = 1.0;
 const ATTITUDE_MAX = 90.0;
 
 
+// This IP address is simply in place to allow development on a personal webserver *without* a static IP address
 const IP = '[2601:1c2:4b00:bf:641e:cf87:39b4:a4be]';
 const VIDEO = 'painting1'; //'gym1';
 const FETCH_MODE = {method: 'get', mode: 'no-cors', redirect: 'follow', headers: new Headers({'Content-Type': 'text/plain'})};
