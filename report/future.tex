@@ -1,0 +1,102 @@
+
+\chapter{Future Work}
+
+
+\section{Frame Independence of Path Selection}
+The primary disappointment of my project is that I could not determine a method (reasonably within the scope of the project) to let the user select the path's origination pixel from any frame except for the first.
+
+
+\section{Mobile Device Support}
+The Web now enjoys a substantial user base using mobile platforms, such as smartphones or tablets. There exists an opportunity to expand this project's client interface to support such devices. While performance optimizations (discussed below) are particularly beneficial on mobile systems, several unique challenges present themselves:
+
+
+\subsection{Fat Finger Problem}
+    The so-called ``Fat Finger Problem", where a user's finger occludes the very area of interest on the screen that the user is attempting to interact with, preventing fine manual interaction.
+
+\subsection{Motion Sensors}
+    A Majority of mobile devices contain \emph{motion sensors}, which generally constitute some combination of:
+    \begin{itemize}
+    \item Gyroscopes, which can detect changes in angular orientation;
+    \item Accelerometer, which can detect translational acceleration, including determination of the Gravity Vector; and
+    \item Magnetometer, which can be used as a compass to detect an absolute bearing, relative to Magnetic North.
+    \end{itemize}
+    Often, the information from the above sensors is passed through \emph{motion fusion} algorithms, in order to negate the individual weaknesses of any one variety of sensor, and derive between them all an absolute attitude (or orientation) of the device in real space.\par
+    Access to this orientation is provided through the HTML DOM, and can be used as a novel means of user interactivity. For example, the user could physically rotate the device in order to rotate the video and its motion trajectory path, instead of dragging the mouse.
+
+
+
+\section{Optimization}
+
+\subsection{Server Data Reduction}
+    My implementation of a WWW 3D DMVN system requires a large amount of stored data on the server: several Gibibytes per short, low-resolution sample video. This represents a meaningful cost to the host of such a DMVN service, and also has a significant impact on the overall network traffic between server and client. We have several opportunities to reduce that burden:
+
+\subsubsection{Storage Format}
+JSON was selected for its JavaScript-native deserialization support, but as a text format it is very verbose. A significant amount of space could be saved by transitioning to a binary alternative, such as \emph{BSON} (Binary JSON).
+
+\subsubsection{Motionless Pixels}
+    Many pixels do not move significantly throughout a scene. Not only does this causesubstantial waste in storing meaningless data, but it can also be confusing to a user when they click on a pixel and get a straight line. If a path is nearly motionless, it could be either:
+    \begin{enumerate}
+        \item Noted in that pixel's respective file as a ``motionless pixel", rather than explicitly list every frame's vertex. This would produce effectively the same behavior as presently.
+        \item Noted in that pixel's respective file as a ``motionless pixel", with redirection to the nearest (2D Euclidean) pixel that \emph{does} have motion, so that the user does not need to search for semantically useful objects to interact with.
+        \item Noted in that pixel's respective file as a ``motionless pixel", causing no generation of a new path when the user attempts to select that pixel, with perhaps some negative feedback (such as a tone or screen blink).
+    \end{enumerate}
+    Of these options, I suspect \#2 might be preferable.
+
+\subsubsection{Path Resolution}
+    Currently, we supply one path vertex per frame, or the maximum possible path resolution. This may not be practically necessary; a vertex every second or even fifth frame may suffice for an acceptable user experience.
+
+\subsubsection{Elision of $z$ Coordinate}
+    The inclusion of the $z$ coordinate for each vertex is not truly necessary, as that information could be reconstructed on the client side by dividing each array element's index by the element count, minus one. This would add a small amount of performance overhead to the client process, but since it only occurs once each time a path is loaded, its overall impact should be minimal for the amount of space saved on the server (nearly $\div{1}{3}$).
+
+
+\subsection{Client Performance}
+Since user selection of a point along the path (path vertex with nearest temporally-weighted Euclidean distance) is a \emph{reduction} operation over the set of vertices, it is ill suited for GPU implementation. Hence, we resolved to perform the per-frame matrix-multiplication (transformation) of the path vertices on the CPU, and then send those to the GPU for display, since otherwise the transformed vertices necessary for user-mouse interaction would be redundantly calculate.\par
+In other words, since this fairly heavyweight calculation was necessary to compute on the CPU, we decided not to \emph{also} reperform the computation on the GPU; the transformed data is instead sent to the GPU. However, there is an advanced feature of OpenGL called \emph{Transform Feedback} that would allow the transformed vertices from the GPU to be made available in a buffer accessible to the CPU. The end-result would be identical in that redundant calculation is avoided, but instead of the singular calculation happening on the CPU, it would happen on the GPU instead, which should be more performant.
+
+
+
+\section{Semantics \& Intuitiveness}
+
+\subsection{Semantically Interesting Motion}
+    The fundamental purpose of DMVN is to allow for a more intuitive video-navigation method: the user is enabled to drag an ``object of interest" through space to navigate to the corresponding time in the video. These ``objects of interest" may often be people, animals, or objects. However, motion beyond of these ``objects of interest" would generally serve to cloud the user experience, especially in situations that may challenge conventional computer vision techniques, or otherwise cannot be resolved to a singular, clear path of motion. For example, fluids such as smoke, rain, rustling leaves, bodies of water, or perhaps even clouds do not exhibit the type of motion that we wish to capture and express to the user as a ``motion path" for the purposes of navigation.
+\par We can categorize these kinds of unwanted motion as follows:
+\subsubsection{Incoherent Motion}
+    The motion of leaves rustling, smoke billowing, sea foam. To address this, I might:
+    \begin{enumerate}
+    \item segment the optical flow image into blobs of areas of coherent motion, or
+    \item otherwise perform some statistical analysis of pixel neighborhoods to filter out motion that doesn't show cohesive motion over a relatively large pixel area
+    \end{enumerate}
+    This would of course risk filtering out smaller objects that \emph{would be} semantically interesting to track, such as a flying bird in the distance.
+\subsubsection{Global Motion}
+    ``Global motion" covers issues such as:
+    \begin{itemize}
+    \item camera motion, either rotational, translational, or both;
+    \item rain, fog, mist, or other atmospheric motion (this also applies if the video is entirely of a body of water); and
+    \item noise, such as that from the video source (CCD/CMOS image sensor or film) or from compression.
+    \end{itemize}
+
+\subsection{Immobile Regions}
+In our example videos, and in many others where the camera is immobile, a majority of the video may be considered to either be an ``immobile region": when the user selects a pixel to generate a motion-path, they will be greeted with what appears to be a straight line. This may cause confusion to the user, as they have been told that DMVN helps them navigate by dragging objects, and yet selecting an area that is not an object causes what may appear to them to be confusing behavior.
+
+\subsection{Camera Motion}
+Camera motion provides some unique challenges to DMVN; the examples demonstrating DMVN avoid this issue, because it is difficult to overcome. Since the intent of the motion path is to be able to visualize the motion of the object throughout a scene, the true path would become confusing if the frame of reference of that motion were to change mid-stream.\par
+    While solutions exist for camera pose and motion estimation (and for the related field of video stabilization), how can these techniques be used in the context of DMVN? I would propose experimentation of the following scheme:\par
+    Basic 3D DMVN allows the user to rotate the video and path in the $x$- and $y$-axes; the video planar section otherwise stays at the origin (translationally), and is not rotated in the $z$-axis. In an enhanced model, when the camera undergoes some transformation (translation, rotation, etc), then the video planar section could counter-transform in the opposite direction, but same amount, in order to achieve a kind of ``path stabilization", to ensure that the path's frame of reference remains constant throughout the scene.
+
+\subsection{Semantic Segmentation}
+The premise of DMVN is the ability to navigate a video by dragging an object through its motion path; not a pixel and its motion path, as I've implemented it. In order to improve this aspect, there are several questions that need to be answered:
+\begin{itemize}
+    \item What are the objects under motion?
+    \item What are the objects under motion \emph{that are semantically interesting}?
+    \item What kinds of motion are interesting enough to use as a means of video navigation?
+    \item What \emph{parts} of an object are worth tracking?
+\end{itemize}
+This would be more of an artificial intelligence research area. If the number of semantically interesting paths could be automatically detected and simplified to one or two, then DMVN becomes trivial for both the user and for the host (in terms of reduced data storage needs, user-interactivity requirements, etc).
+\par This can be very challenging, because for example, a person may or may not be one object to track: their hands and legs may be moving in different directions that may be interesting of their own accord, or other times the user may be interested in the path of the whole person.
+
+\subsection{Scene-Change Detection}
+    Many videos have scene changes, especially those which have been post-produced from a collection of ``takes", or live-broadcast videos where there is a mechanism for a Producer to switch between cameras. Generally, it would probably be wise to reset the DMVN path tracking when a scene change is detected.\par
+    There may, however, be some instances, where it might be possible to correlate the path between two scenes. As an example, let us imagine a guitar tutorial video: the camera is positioned to show the guitarist's hand positioned on the fretboard so that the viewer can see and analyze the fingerings. The scene changes to a camera that is from the guitarist's point of view, so that the viewer can understand how the fingering might look from their own perspective. It could be possible to track the path of the finger between the two scenes.\par
+    If an affine transform of the camera's scene change can be derived, then it may be possible to keep the finger's path as a continuous line, but to perform that affine transform on the video's rectangle.
+
+\subsection{Continuity}

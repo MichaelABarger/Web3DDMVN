@@ -1,0 +1,307 @@
+
+\chapter{Mathematics}
+
+
+\section{Coordinate Systems}
+As in most graphics applications, throughout our implementation we work with many different coordinate systems, and must convert between them.
+
+\subsection{Video (Pixel) Space}
+When operating on the video frames in Python using \texttt{opencv} and \texttt{numpy}, we generally consider those images as matrices (where each pixel is an element), and so use standard mathematical row-column indexing: $M_{ij}$, where $i$ is the row and $j$ is the column. This translates to $M_{yx}$, where $y$ is the vertical coordinate and $x$ the horizontal, which may be counterintuitive to some graphics programmers.
+\setlength{\unitlength}{0.04cm}
+\begin{figure}[h]
+\centering
+\begin{picture}(100, 100)
+\thicklines
+\put(5, 95){\vector(0, -1){95}}
+\put(5, 95){\vector(1, 0){95}}
+\put(5, 95){\circle*{3}}
+\put(7, 74){$(0,0)$}
+\put(75, 85){$(0,639)$}
+\put(8, 0){$(359,0)$}
+\thinlines
+\put(5, 95){\vector(3,-2){50}}
+\put(56, 61){\circle*{2}}
+\put(55, 50){$(y,x) | y \in [0, 360) \subset \mathbb{N}, x \in [0, 640) \subset \mathbb{N}$}
+\end{picture}
+\caption{Video (Pixel) Space}
+\end{figure}
+
+\subsection{Normalized Texture Coordinates}
+OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from textures, through \emph{Normalized Texture Coordinates}. Unlike many other image/texture addressing systems, this system uses real numbers instead of natural numbers, as the GPU Texture Unit hardware will perform bilinear interpolation to enable subpixel fetching.
+\begin{figure}[h]
+\centering
+\begin{picture}(100, 100)
+\thicklines
+\put(5, 95){\vector(0, -1){95}}
+\put(5, 95){\vector(1, 0){95}}
+\put(5, 95){\circle*{3}}
+\put(7, 74){$(0,0)$}
+\put(75, 85){$(1,0)$}
+\put(8, 0){$(0,1)$}
+\thinlines
+\put(5, 95){\vector(3,-2){50}}
+\put(56, 61){\circle*{2}}
+\put(55, 50){$(x,y) | x,y \in [0,1] \subset \mathbb{R}$}
+\end{picture}
+\caption{Normalized Texture Coordinates}
+\end{figure}
+\subsection{Normalized Device Coordinates}
+Normalized Device Coordinates (NDC) are the only 3D coordinate system used in our project. It is used by OpenGL: the Vertex Shader stage must present a vertex position to the rendering engine in this coordinate space. A left-handed $\mathbb{R}^3$ space where $x$, $y$, and $z$ are all on $[-1, 1]$, any draw primitive (usually a triangle) where all vertices are outside of that domain will be clipped (not rendered).
+\begin{figure}[h]
+\centering
+\begin{picture}(100, 100)
+\thicklines
+\put(49, 49){\vector(0, -1){50}}
+\put(49, 49){\vector(0, 1){50}}
+\put(49, 49){\vector(1, 0){50}}
+\put(49, 49){\vector(-1, 0){50}}
+\put(49, 49){\vector(2, 1){30}}
+\put(49, 49){\vector(-2, -1){30}}
+\put(49, 49){\circle*{3}}
+\put(90, 53){$+x$}
+\put(5, 53){$-x$}
+\put(50, 92){$+y$}
+\put(50, 5){$-y$}
+\put(10, 25){$+z$}
+\put(75, 70){$-z$}
+\thinlines
+\put(49, 49){\vector(-1, 2){10}}
+\put(38, 70){\circle*{2}}
+\put(0, 78){$(x,y,z)|x,y,z \in [0,1] \subset \mathbb{R}$}
+\end{picture}
+\caption{OpenGL Normalized Device Coordinates}
+\end{figure}
+\par OpenGL uses the following algorithm to determine whether to clip a polygon:
+\begin{enumerate}
+    \item For each vertex $\vec{v}$ in each polygon (triangle) drawn:
+    \item If $|v_x|$, $|v_y|$, or $|v_z| > 1$, then that vertex is marked for clipping.
+    \item If all vertices $\vec{v}$ in a polygon are marked for clipping, then the polygon is not drawn (is clipped)
+\end{enumerate}
+\subsection{DOM Space}
+In the context of HTML pages, positions (particularly: mouse positions and such) are measured in ``DOM Space", an integral pixel space with origin in the upper-left corner \emph{of the containing DOM element}. For example, if handling an event of a \texttt{canvas} element, then the DOM Space's origin will be in the upper-left corner of that \texttt{canvas} element, and its domain also bound by that element's pixel width and height.
+\par As DOM Space's origin is measured as $(0,0)$, its domain is $x \in [0,w) \subset \mathbb(N)$ and $y \in [0,h] \subset \mathbb{N}$, where $w$ is the width and $h$ is the height of the containing object in pixels.
+\begin{figure}[h]
+\centering
+\begin{picture}(100, 100)
+\thicklines
+\put(5, 95){\vector(0, -1){95}}
+\put(5, 95){\vector(1, 0){95}}
+\put(5, 95){\circle*{3}}
+\put(7, 74){$(0,0)$}
+\put(75, 85){$(w-1,0)$}
+\put(8, 0){$(0,h-1)$}
+\thinlines
+\put(5, 95){\vector(3,-2){50}}
+\put(56, 61){\circle*{2}}
+\put(55, 50){$(x,y) | x \in [0, w) \subset \mathbb{N}, y \in [0, h) \subset \mathbb{N}$}
+\end{picture}
+\caption{DOM Space}
+\end{figure}
+
+
+
+\section{Coordinate Transforms}
+We can use simple linear operations to convert between these coordinate spaces. To demonstrated, we will show the conversions to or from Normalized Texture Coordinates. In some cases, both Video and DOM Space will be referred to as Pixel Space, whenever the order of the coordinates is not relevant. ($w$ is the width and $h$ is the height of the image in pixel space.)
+
+\subsubsection{Pixel Space $\vec{p}$ to Normalized Texture Coordinates $\vec{t}$}
+\begin{equation}
+    \vec{t} = \langle \frac{p_x}{w-1}, \frac{p_y}{h-1} \rangle
+\end{equation}
+
+\subsubsection{Normalized Device Coordinates $\vec{n}$ to Normalized Texture Coordinates $\vec{t}$}
+\begin{equation}
+    \vec{t} = \langle \frac{n_x + 1}{2}, \frac{n_y + 1}{2} \rangle
+\end{equation}
+
+\subsubsection{Normalized Texture Coordinates $\vec{t}$ to Video Space $\vec{v}$}
+\begin{equation}
+    \vec{v} = \langle ht_y, wt_x \rangle
+\end{equation}
+
+\subsubsection{Normalized Texture Coordinates $\vec{t}$ to DOM Space $\vec{d}$}
+\begin{equation}
+    \vec{d} = \langle wt_x, ht_y \rangle
+\end{equation}
+
+\subsubsection{Normalized Texture Coordinates $\vec{t}$ to Normalized Device Coordinates $\vec{n}$}
+\begin{equation}
+    \vec{n} = \langle 2t_x - 1, 2t_y - 1, 0 \rangle
+\end{equation}
+
+
+\section{Spatial Transforms}
+
+\subsection{Scaling Matrices}
+\begin{equation}
+S(\vec{s}) =
+\begin{bmatrix}
+    s_{x} & 0 & 0 \\
+    0 & s_{y} & 0 \\
+    0 & 0 & s_{z}
+\end{bmatrix}
+\end{equation}
+
+\subsection{Rotation Matrices}
+
+\subsubsection{Rotation About the $x$ Axis}
+\begin{equation}
+R_x(\phi) =
+\begin{bmatrix}
+    \cos\phi & 0 & -\sin\phi \\
+    0 & 1 & 0 \\
+    \sin\phi & 0 & \cos\phi
+\end{bmatrix}
+\end{equation}
+
+\subsubsection{Rotation About the $y$ Axis}
+\begin{equation}
+R_y(\theta) =
+\begin{bmatrix}
+    1 & 0 & 0 \\
+    0 & \cos\theta & \sin\theta \\
+    0 & -\sin\theta & \cos\theta
+\end{bmatrix}
+\end{equation}
+
+\subsection{Projection Matrices}
+For 3D DMVN, we opt to use Orthogonal instead of Pespective Projection, in order to minimize distortion of the video and path under rotation. Since we've further optimized the vertex positions of the objects to be drawn to Normalized Device Coordinates, all our Projection Matrix needs to do is to compensate for the aspect ratio of the viewport window; we can do this with Scaling Matrix, as above.
+
+\subsection{3D DMVN Matrices}
+\subsubsection{Transform Matrix}
+The transformations that must be performed are, in order:
+\begin{enumerate}
+    \item Scaling to the video aspect ratio $\eta_{video}$ and the ``reduction factor" $\rho$, which describes how much smaller the video should be than the viewport as a whole.
+    \item X Rotation, based off of the user mouse input
+    \item Y Rotation, based off of the user mouse input
+    \item The Projection Matrix, which is simply a Scaling Matrix to correct for the \texttt{canvas} element's (viewport's) aspect ratio $\eta_{viewport}$.
+\end{enumerate}
+This Transform Matrix $T$ is derived as follows:
+\begin{equation}
+\begin{cases}
+    S' & = S(\rho, \rho \eta_{video}, 1) \\
+    R' & = R_y(\theta) R_x(\phi) \\
+    P' & = S(1, \eta_{viewport}, 1) \\
+    T & = P' R' S'
+\end{cases}
+\end{equation}
+
+\subsubsection{Application}
+For the drawing of the Video Box itself, we apply the transform matrix $T$ to each vertex $\vec{v}$ of the video rectangle to obtain the transformed vertex $\vec{v}'$:
+\begin{equation}
+    \vec{v}' = T \vec{v}
+\end{equation}
+\par For the path and box, since we want them to move translationally with video time $0 \leq t \leq 1$, we first modify each vertex's $z$ coordinate before applying the transform matrix:
+\begin{equation}
+\begin{cases}
+    \vec{v}' & = \langle v_x, v_y, v_z - t \rangle \\
+    \vec{v}'' & = T \vec{v}'
+\end{cases}
+\end{equation}
+
+\section{DMVN Interactivity}
+The user interacts with the DMVN three different ways:
+\begin{enumerate}
+\item rotating the video and path;
+\item dragging along the path to temporally navigate the video; and
+\item selecting a pixel to derive a new path from.
+\end{enumerate}
+
+\subsection{Rotating the Scene}
+Whenever the user \emph{right-click drags} their mouse, we translate the mouse movement in $(x,y)$ DOM Space to Euler angles (yaw and pitch, $\phi$ and $\theta$), ensuring that neither $\phi$ nor $\theta$ never exceed $\pm45\deg$. $\phi$ and $\theta$ are used in the generation of the 3D $x$ and $y$ rotation matrices for our 3D DMVN Matrix.
+
+\subsection{Temporal Navigation}
+Clicking the left mouse button triggers temporal navigation. While holding the button down and dragging, we iterate over the entire set of path points $\vec{p}$ and choose a ``nearest" one to the normalized mouse location $\vec{m}$ as follows:
+\begin{equation}
+    t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2 + \kappa (p_t - m_t)^2}
+\end{equation}
+This is a straightforward Euclidean distance between our ``point of selection" $\vec{m}$ and $\vec{p}$. $t$ is the time of the current video frame, and $\kappa$ is a scaling constant meant to be tuned to allow for smooth navigation. (We found $\kappa=.9$ to work well.)
+\par We did find preferable behavior in using a simpler, atemporal distance when doing the ``initial seek":
+\begin{equation}
+    t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2}
+\end{equation}
+as when a user initially clicks to begin navigation, they are rarely considering temporal coherence.
+\par We did optimize the performance of the code by removing the square-root operation, since it isn't ultimately relevant to the result, as
+\begin{equation}
+    \arg \min \sqrt x_i = \arg \min x_i
+\end{equation}
+
+\subsection{Path Pixel Selection}
+
+
+
+\section{Ray Tracing}
+We wanted the user to be able to select a pixel from the video, regardless of the current orientation of that video in $\mathbb{R}^3$ space and despite all of those above transforms. In order to do this, we must cast a ray where the user middle-clicks with their mouse, down into that $\mathbb{R}^3$ space, and determine its point of intersection with the planar surface of the video in a way in which we can then determine the pixel coordinates of such intersection.\par
+\subsection{Designing a Parametric Intersection Equation}
+    We decided to solve this problem by expressing it as a system of parametric vector equations. Since our video surface, prior to transformations, exists as a "full-screen quad" in the XY plane from $[-1,1]$, we start with three points on that quad: the upper-left corner $\vec{a}=\langle-1,1,0\rangle$, the upper-right corner $\vec{b}=\langle1,1,0\rangle$, and the lower-left corner $\vec{c}=\langle1,-1,0\rangle$. Then, we apply our global scaling/rotation transformation matrix, $M$ to those three points; for example, $\vec{a}'=M\vec{a}$.\par
+    The parametric form of a plane can be expressed as $\vec{p_0}+\vec{u}s+\vec{v}t$, where $\vec{p_0}$ is any reference point on that plane, and $\vec{u}$ and $\vec{v}$ are any rays along its surface. In order to utilize this parametric form to solve my problem, I will let $\vec{u}$ define the horizontal axis of my video frame on $[0,1]$, and $\vec{v}$ represent the vertical axis of my video frame, also on $[0,1]$, similar to the \emph{Normalized Texture Coordinates} described above. By doing this, we can easily convert these normalized coordinates to pixel coordinates, and we can also easily test for rays that do not intersect the transformed video plane by checking if the point of intersection lies outside of $[0,1]$ regardless of the pixel dimensions of the video.\par
+    Since $\vec{a}'$ is the origin of our desired coordinate space, we will use it as $\vec{p_0}$. As $\vec{b}'$ is also the point where the horizontal axis of the video is maximally in bounds, we can define $\vec{u}=\vec{b}'-\vec{a}'$; similarly, for the vertical axis we can define $\vec{v}=\vec{c}'-\vec{a}'$. It follows, then, that we can express any point $\vec{z}$ on our plane as
+    \begin{equation}
+    \vec{z}=\vec{a}'+\vec{u}s+\vec{v}t
+    \end{equation}
+where $s$ and $t$ are the parametric variables.\par
+    For the ray that is cast by the user's middle-mouse click, we can express it also in parametric form as $\vec{p_0}+\vec{d}r$, where $\vec{p_0}$ is the position vector for the origin of the ray, $\vec{d}$ is the direction vector, and $r$ is the parametric variable. When we receive the middle-mouse click event from the DOM, it will be in \emph{DOM Space}, and so will need to be normalized to the dimensions of the \texttt{canvas} object that the WebGL context is in. If we assume that this ray is cast ``downward" from the $(x,y)$ point, or $\vec{m}=\langle m_x, m_y \rangle$ point where the user selected, then we can take $\vec{p_0}=\langle m_x, m_y, 0 \rangle$ and $\vec{d}=\langle 0, 0, -1 \rangle$. Therefore, the parametric equation for a point $\vec{z}$ on our ray should be:
+    \begin{equation}
+    \vec{z}=\langle m_x, m_y, 0 \rangle + \langle 0, 0, -1 \rangle r
+    \end{equation}
+\par You will notice that I've set both of the above equations equal to $\vec{z}$; by having the same point equal to both the parametric equation for the plane as well as the ray, $\vec{z}$ becomes a point of intersection between the two. However, it then also becomes redundant; we can now describe the intersection of the ray and the plane as:
+    \begin{equation}
+    \vec{a}'+\vec{u}s+\vec{v}t=\langle m_x, m_y, 0 \rangle + \langle 0, 0, -1 \rangle r
+    \end{equation}
+
+\subsection{Solving the Intersection Equation}
+While our parametric equation above is in vector notation, it could equivalently described as a system of equations as follows:
+    \begin{equation}
+    \begin{cases}
+        a_x'+u_x s + v_x t & =  m_x \\
+        a_y'+u_y s + v_y t & =  m_y \\
+        a_z'+u_z s + v_z t & =  -r
+    \end{cases}
+    \end{equation}
+We have three unknowns ($s$, $t$, and $r$) and three equations in our system. Our plan is to solve them using matrices, so our first order is to reorganize the equations so that all unknowns and their coefficients are represented on one side of the equation, and constants on the other:
+    \begin{equation}
+    \begin{cases}
+        u_x s + v_x t + 0r & =  m_x - a_x' \\
+        u_y s + v_y t + 0r & =  m_y - a_y' \\
+        u_z s + v_z t + 1r & =  -a_z'
+    \end{cases}
+    \end{equation}
+This simultaneous equation can then be expressed as a matrix equation by separating the coefficients, unknown variables, and constants into three separate matrices:
+    \begin{equation}
+    \begin{bmatrix}
+        u_x & v_x & 0 \\
+        u_y & v_y & 0 \\
+        u_z & v_z & 1
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+        s \\
+        t \\
+        r
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    m_x - a_x' \\
+    m_y - a_y' \\
+    -a_z
+    \end{bmatrix}
+    \end{equation}
+\par We will solve this equation whenever the user middle-clicks on a part of the WebGL \texttt{canvas} element by taking advantage of the following property:
+    \begin{equation}
+    AX=B \iff X=A^{-1}B
+    \end{equation}
+\par There are many methods to find the inverse of the $3 \times 3$ matrix; we'll do it through this process:
+\begin{enumerate}
+    \item Calculate the Matrix of Minors:
+        \begin{enumerate}
+        \item For each element $m_{ij}$ in the matrix $A$, collect a $2 \times 2$ matrix of all elements that are in neither the row $i$ nor column $j$ of the current element;
+        \item Find the determinant of that $2 \times 2$ matrix, and assign that value to $m_{ij}$ of the Matrix of Minors.
+        \end{enumerate}
+    \item Calculate the Matrix of Cofactors by negating $m_{01}$, $m_{10}$, $m_{12}$, and $m_{21}$ of the Matrix of Minors.
+    \item Transpose the Matrix of Cofactors to obtain the Adjugate.
+    \item Calculate the determinate of the original matrix $A$:
+        \begin{enumerate}
+        \item This can be optimized by using the already-calculated values in the Matrix of Minors
+        \end{enumerate}
+    \item The inverse matrix $A^{-1}$ is the Adjugate divided by the determinate of $A$: $A^{-1}=\frac{\text{adj}A}{|A|}$
+
+\end{enumerate}
