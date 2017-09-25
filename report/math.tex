@@ -132,6 +132,7 @@ We can use simple linear operations to convert between these coordinate spaces. 
 \section{Spatial Transforms}
 
 \subsection{Scaling Matrices}
+Where $\vec{s}$ is a vector of dimensional factors by which we wish to scale:
 \begin{equation}
 S(\vec{s}) =
 \begin{bmatrix}
@@ -144,6 +145,7 @@ S(\vec{s}) =
 \subsection{Rotation Matrices}
 
 \subsubsection{Rotation About the $x$ Axis}
+By the angle $\phi$:
 \begin{equation}
 R_x(\phi) =
 \begin{bmatrix}
@@ -154,6 +156,7 @@ R_x(\phi) =
 \end{equation}
 
 \subsubsection{Rotation About the $y$ Axis}
+By the angle $\theta$:
 \begin{equation}
 R_y(\theta) =
 \begin{bmatrix}
@@ -289,7 +292,7 @@ This simultaneous equation can then be expressed as a matrix equation by separat
     \begin{equation}
     AX=B \iff X=A^{-1}B
     \end{equation}
-\par There are many methods to find the inverse of the $3 \times 3$ matrix; we'll do it through this process:
+\par There are many methods to find the inverse of the $3 \times 3$ matrix; we'll do it through this process: \cite{matlinsys}
 \begin{enumerate}
     \item Calculate the Matrix of Minors:
         \begin{enumerate}

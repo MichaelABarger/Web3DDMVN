@@ -8,7 +8,7 @@
 In the analysis of the systems architecture for this implementation, we must give prime consideration to which aspects of a WWW 3D DMVN differ from those of a native PC implementation.
 
 \subsubsection{Network Bandwidth}
-Network bandwidth is an important consideration in the design of a web-based system that is generally not a factor for native programs that operate locally on a single PC. Lack of consideration for this will cause the client to experience (potentially very long) long waits while information is transmitted to their PC over the Internet, and will cost the proprietors of the server money, as they will need to increase their upload bandwidth service in order to avoid service congestion.
+Network bandwidth is an important consideration in the design of a web-based system that is generally not a factor for native programs that operate locally on a single PC. Lack of consideration for this will cause the client to experience (potentially very) long waits while information is transmitted to their PC over the Internet, and will cost the proprietors of the server money, as they will need to increase their upload bandwidth service in order to avoid service congestion.
 \par It is thus paramount to minimize the amount of data that must be transmitted to the PC to be the absolute minimum necessary.
 
 \subsubsection{Network Latency}
@@ -33,14 +33,19 @@ All of the above incur monetary cost to the server host, and so should all be co
 \subsection {Architecture}
 The client-facing front-end web page will provide all input/output user interactivity: it will show the 3D DMVN video and path, it will provide the means for the user to rotate the DMVN video and navigate through the motion trajectory path. It will load its requisite front-end files: HTML, CSS, JS (JavaScript), and video (H.264/MP4) are statically requested from the server by the web page, as is standard and expected by any HTML page on the World Wide Web.
 \par However, since path data for every pixel is too large to make a static resource of the web page, we will instead make dynamic HTTP GET requests for that data, and only send the necessary information across the Net. In order to achieve this via standard HTTP services (and not require a custom back-end server), we will make a \emph{separate path data file} for each pixel in each video.
-\par On the Web front-end, we will provide interactivity through JavaScript (by default, since it is the only language supported natively), and use GPU acceleration through the WebGL API for the graphics processing required for 3D DMVN.
+\par On the Web front-end, we will provide interactivity through JavaScript and use GPU acceleration through the WebGL API for the graphics processing required for 3D DMVN.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{arch}
+\caption{Client-Server 3D DMVN Architecture (HTTP Requests)}
+\end{figure}
 
 \section{Back-End Preparation}
 Before we can implement the 3D DMVN front-end service, we need to first generate path data files from the provided video data.
 
 \subsection{Reverse Engineering}
-Since there was no description of the binary files associated with the videos provided, I needed to perform some reverse engineering in order to utilize them. I made the following observations:
+Since there was no description of the binary files associated with the videos provided, we needed to perform some reverse engineering in order to utilize them. We made the following observations:
 \begin{itemize}
     \item The filenames were of the format \texttt{uvXXX.bin}, where \texttt{XXX} represents some integral value:
     \begin{itemize}
@@ -49,7 +54,7 @@ Since there was no description of the binary files associated with the videos pr
         \item The files' extension was \texttt{.bin}, so the contents were likely binary.
     \end{itemize}
     \item All files had the exact same file size, reinforcing that these must be uncompressed binary files, and that the format of the contents must be related to the dimensions of the video in some way;
-    \item Since both videos were $640\times 360$, dividing their filesize by that product resulted in a per-pixel allotment of 16 Bytes. Divided in half (for the ${u,v}$ coordinates), this would allow for 8 Bytes per unit of information. If this were optical flow information, as I expected it might be, then it would seem that the datatype must be 64-bit floating point.
+    \item Since both videos were $640\times 360$, dividing their filesize by that product resulted in a per-pixel allotment of 16 Bytes. Divided in half (for the ${u,v}$ coordinates), this would allow for 8 Bytes per unit of information. If this were optical flow information, as we expected it might be, then it would seem that the datatype must be 64-bit floating point.
     \item Inspecting the binary contents of the files through the \texttt{xxd} utility confirmed that there were repeating, regular patterns on 8-Byte boundaries.
 \end{itemize}\par
 Next, we attempt to read the files and display them on the screen: one common way to convert the $(u,v)$ (the optical flow vector of $\vec{\Delta p}=\langle \Delta x,\Delta y \rangle$) information to displayable colors is by converting the information to a representation in HSL space as a kind of polar visualization:
@@ -75,8 +80,29 @@ and thus our conversion from optical flow vector to HSL display pixel becomes:
     s & = & 1 \\
     l & = & \lVert \vec{\Delta p} \rVert
 \end{eqnarray*}
-However, the resulting visualization appeared to be spatially distorted:\par
-After some thought, it occurred to me that perhaps these optical flow files were created through the MatLab SIFTFlow package; if that were the case, then perhaps the binary representation of the multidimensional array might be in Fortran order, rather than C order. This was the key, and the result was as below:
+However, the resulting visualization appeared to be spatially distorted, which can be seen in Figure~\ref{fig:flowc}.
+
+\begin{figure}[h]
+\centering
+\begin{minipage}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth]{FlowC1}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth]{FlowC2}
+\end{minipage}
+\caption{Spatial Distortion of Improperly Read Flow Data, In Both Row-Col and Col-Row Orientations}
+\label{fig:flowc}
+\end{figure}
+
+\par After some thought, it occurred to me that perhaps these optical flow files were created through the MatLab SIFTFlow package; if that were the case, then perhaps the binary representation of the multidimensional array might be in Fortran order, rather than C order. This was the key, and the result can be seen in Figure~\ref{fig:flowf}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{FlowF}
+\caption{Flow Data Correctly Read With Fortran-Style Multidimensional Array Ordering}
+\label{fig:flowf}
+\end{figure}
 
 \subsection{Optical Flow}
 Optical Flow is a means of determining the motion of pixels from one frame of video to another. The binary files associated with the provided videos are optical flow data, providing a $\Delta \vec{p} = (\Delta x, \Delta y)$ for each pixel, for each frame of video. This $\Delta \vec{p}$ expresses how the optical flow algorithm determined the pixel from the first frame to the next.
@@ -114,10 +140,18 @@ and $0 \leq x \leq 1$.
 
 \subsection{Path Generation}
 Now, using some programs  written in \texttt{python} with the \texttt{numpy} and \texttt{opencv} libraries, we generated path information for the web page to use. Ultimately, we intend to export the generated path as JSON information; in order to do so, we will convert the set of path coordinates from Video (Pixel) Space to Normalized Device Coordinates, with the $z$ coordinate set to be on $[0,1]$, where 0 is the first frame, and 1 is the final frame.
+
 \subsubsection{Interactive Path Generation}
-The first program, written for development purposes, would load the first frame of the video and allow a user to select a single pixel with a mouse click. Then, it would trace the optical flow from the pixel, showing its path while playing back the video. Finally, the program provided JSON for the selected pixel's path; I used this for initial development and testing.
+The first program, written for development purposes, would load the first frame of the video and allow a user to select a single pixel with a mouse click. Then, it would trace the optical flow from the pixel, showing its path while playing back the video. Finally, the program provided JSON for the selected pixel's path; we used this for initial development and testing.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{Interactive}
+\caption{Interactive Flow Path Generation (Small, Cyan Circle Near Center)}
+\end{figure}
+
 \subsubsection{Batch Path Generation}
-The second program does the same as above, eschewing the visualizations and UI for performance, tracing the optical flow path for every pixel in the video, rather than a single pixel selected by a user. After some optimization by minimizing looped calculations and preloading all optical-flow files into memory, I was able to get execution time for the batch path generation down to about 12 seconds per video line for the \texttt{gym1} video, and about 15 seconds per line for the \texttt{painting1} video, which . However, it would still take more than an hour to generate the paths for every pixel in these relatively short and low-resolution videos. The final result of running this program was a directory full of JSON path files, with one file per pixel and a strict naming format: for example, \texttt{painting1-0235x0192.json}.
+The second program does the same as above, eschewing the visualizations and UI for performance, tracing the optical flow path for every pixel in the video, rather than a single pixel selected by a user. After some optimization by minimizing looped calculations and preloading all optical-flow files into memory, We were able to get execution time for the batch path generation down to about 12 seconds per video line for the \texttt{gym1} video, and about 15 seconds per line for the \texttt{painting1} video, which . However, it would still take more than an hour to generate the paths for every pixel in these relatively short and low-resolution videos. The final result of running this program was a directory full of JSON path files, with one file per pixel and a strict naming format: for example, \texttt{painting1-0235x0192.json}.
 
 
 
@@ -213,7 +247,7 @@ The Vertex Shader simply applies the transformation matrix to each vertex, and r
 
 \subsubsection{Fragment Shader}
 While the Fragment Shader is also very basic, largely performing the operation of sampling the texture and pushing that sample's color as its output, it does take the $z$ coordinate passed from the Vertex Shader stage into account to brighten or darken the pixel slightly based on its depth.
-\par Since 3D DMVN uses orthographic projection, I decided that some indication of what is near or far is helpful to the user, and so chose to do it through this mechanism or brigthening closer pixels and darkening further pixels.
+\par Since 3D DMVN uses orthographic projection, we decided that some indication of what is near or far in lieu of perspective might be helpful to the user, and so chose to do it through this mechanism or brigthening closer pixels and darkening further pixels.
 
 \subsection{Wire-Frame Box-Volume Shader}
 The Wire-Frame Box-Volume shader draws an encapsulating volume to visually reinforce the depth component of the video and path, while the video remains translationally stationary in the center.
@@ -234,6 +268,12 @@ The Fragment Shader is the simplest possible: it passes through a constant white
 
 \subsection{Motion Trajectory Path Shader}
 The Motion Trajectory Path Shader draws the motion trajectory ``seek" path over the video.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{Path}
+\caption{Path line drawn over video rectangle}
+\end{figure}
 
 \subsubsection{Buffers \& Attributes}
 Unlike the other two shaders, the Path Shader receives vertex position information that is pre-transformed (both a negative $z$-axis shift, as well as with the matrix applied), since those transformations are pre-applied on the CPU for purposes of mouse-proximity calculation, and thus there was no need for redundant calculation. Whether the memory cost of retransmitting the positional buffers every frame is more than the perceived cost of redundant calculation is unverified.

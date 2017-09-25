@@ -1,8 +1,14 @@
 
 \chapter{Scope}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{DMVN}
+\caption{Web-based 3D DMVN}
+\end{figure}
+
 \section{Goals}
-The objective of this project was to implement a novel method for interactive video navigation, \textbf{\emph{3D Direct Manipulation Video Navigation}} (hereforth referred to as \emph{3D DMVN}) as a service remotely accessible via the World Wide Web. The original implementation of 3D DMVN was a native PC executable; porting it to a web-based system requires different considerations in its systems architecture; for example:
+The objective of this project was to implement a novel method for interactive video navigation, \textbf{\emph{3D Direct Manipulation Video Navigation}} \cite{dmvn} (hereforth referred to as \emph{3D DMVN}) as a service remotely accessible via the World Wide Web. The original implementation of 3D DMVN was a native PC executable; porting it to a web-based system requires different considerations in its systems architecture; for example:
 \begin{itemize}
     \item a web service is usually accessed through a remote client, and the data transferred from server to client must traverse the World Wide Web;
     \begin{itemize}
@@ -15,12 +21,12 @@ The objective of this project was to implement a novel method for interactive vi
 \end{itemize}
 
 \subsection{Direct Manipulation Video Navigation}
-Direct Manipulation Video Navigation (or \emph{DMVN}) is a proposed method by which a user is enabled to temporally navigate through a video by dragging an \emph{Object of Interest} along a visual representation of its path of motion, instead of through the traditional linear timeline interface.\par
-As one example of a DMVN implementation: a user might be able to select an object, be presented with a visualization of its motion trajectory path, and then use the mouse to drag the object through that path of motion, rather than through a timeline.\par
+Direct Manipulation Video Navigation (or \emph{DMVN}) is a proposed method by which a user is enabled to temporally navigate through a video by dragging an \emph{Object of Interest} along a visual representation of its path of motion, instead of through the traditional linear timeline interface. \cite{dmvn}
+\par As one example of a DMVN implementation: a user might be able to select an object, be presented with a visualization of its motion trajectory path, and then use the mouse to drag the object through that path of motion, rather than through a timeline.\par
 In other words, DMVN allows the user to interact with a video's seek-time spatially, rather than temporally.
 
 \subsection{\emph{3D} Direction Manipulation Video Navigation}
-3D Direct Manipulation Video Navigation (\emph{3D DMVN}) is a proposed extension of DMVN that allows the user to ``rotate" the video and the object path, whose $z$ coordinate corresponds to a unique position in time. This resolves many problems with the original DMVN:
+3D Direct Manipulation Video Navigation (\emph{3D DMVN}) is a proposed extension of DMVN that allows the user to ``rotate" the video and the object path, whose $z$ coordinate corresponds to a unique position in time. This resolves many problems with the original DMVN: \cite{dmvn}
 \subsection {Temporal Ambiguity}
     If the object pauses in place for some period of time, then the user will have no way to select any specific point of time in that interval with DMVN, since the path remains a constant $(x,y)$ throughout that entire period of immotion. 3D DMVN resolves this, since \emph{time} is given its own axis on the path $(x,y,t)$, which can easily be seen and selected by the user by rotating the view.
 \subsubsection{Recurring Motion}
