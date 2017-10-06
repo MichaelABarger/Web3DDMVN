@@ -78,8 +78,15 @@ for y in range(0,shape[0]):
             add_to_output_array(i, pt)
 
         def tojson(a, path):
+            b = a[1:,:] - a[:-1,:]
+            c = b.flatten()
+            d = np.dot(c,c)
+            go_nowhere = d < 0.001
+
             output = {}
-            output['path'] = a.tolist()
+            output['go_nowhere'] = go_nowhere
+            if not go_nowhere:
+                output['path'] = a.tolist()
             json.dump(output, codecs.open(path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
 
         tojson(op, "paths/{}-{:04d}x{:04d}.json".format(movie, x, y))

@@ -41,15 +41,14 @@ while not selected:
         exit()
 
 # PHASE 2 -- Trace that point through the whole video based on flow
-op = np.empty((frames + 1, 3))
+op = np.empty((frames + 1, 2))
 def add_to_output_array(index, coord):
     global op
     maxx = float(shape[1] - 1)
     maxy = float(shape[0] - 1)
     x = 2. * float(coord[1]) / maxx - 1.
     y = 2. * (1. - float(coord[0]) / maxy) - 1.
-    z = float(index) / float(frames)
-    op[index] = [x, y, z]
+    op[index] = [x, y]
 
 add_to_output_array(0, pt)
 path = "res/{movie}/uv{i}.bin"
@@ -110,6 +109,12 @@ for i in range(2, frames + 1):
 print(op)
 
 def tojson(a, path):
+    b = a[1:,:] - a[:-1,:]
+    c = b.flatten()
+    d = np.dot(c,c)
+    
+    print("Sum of sq. distances: {}".format(d))
+    print("Go-nowhere path?: {}".format(d < 0.001))
     output = {}
     output['path'] = a.tolist()
     json.dump(output, codecs.open(path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
