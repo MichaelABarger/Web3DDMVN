@@ -112,11 +112,13 @@ def tojson(a, path):
     b = a[1:,:] - a[:-1,:]
     c = b.flatten()
     d = np.dot(c,c)
-    
-    print("Sum of sq. distances: {}".format(d))
-    print("Go-nowhere path?: {}".format(d < 0.001))
+    go_nowhere = d < 0.001
+
     output = {}
-    output['path'] = a.tolist()
+    output['go_nowhere'] = 'true' if go_nowhere else 'false'
+    if not go_nowhere:
+        output['path'] = a.tolist()
+    
     json.dump(output, codecs.open(path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
 
 tojson(op, "out.json")
