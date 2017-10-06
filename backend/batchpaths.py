@@ -84,7 +84,7 @@ for y in range(0,shape[0]):
             go_nowhere = d < 0.001
 
             output = {}
-            output['go_nowhere'] = 'true' if go_nowhere 'false'
+            output['go_nowhere'] = 'true' if go_nowhere else 'false'
             if not go_nowhere:
                 output['path'] = a.tolist()
             json.dump(output, codecs.open(path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
