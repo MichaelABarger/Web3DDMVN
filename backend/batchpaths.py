@@ -5,8 +5,8 @@ import json, codecs
 
 shape = (360,640,2)
 fshape = (float(shape[0]), float(shape[1]), float(shape[2]))
-movie = "painting1"
-frames = 316
+movie = "gym1"
+frames = 180
 framesp1 = frames + 1
 path = "res/{movie}/uv{i}.bin"
 
@@ -27,7 +27,7 @@ for y in range(0,shape[0]):
     sys.stdout.flush()
     for x in range(0, shape[1]):
         pt = (y, x)
-        op = np.empty((framesp1, 3))
+        op = np.empty((framesp1, 2))
 
         def add_to_output_array(index, coord):
             global op
@@ -35,8 +35,7 @@ for y in range(0,shape[0]):
             global maxy_r
             x = float(coord[1]) * maxx_r - 1.
             y = 2. * (1. - float(coord[0]) * maxy_r) - 1.
-            z = float(index) * frames_r
-            op[index] = np.clip([x, y, z], [-1.0, -1.0, 0.0], [1.0, 1.0, 1.0])
+            op[index] = np.clip([x, y], [-1.0, -1.0], [1.0, 1.0])
 
         add_to_output_array(0, pt)
 
@@ -77,17 +76,19 @@ for y in range(0,shape[0]):
             pt = restrict_to_bounds(pt, bilinear_interpolate(flow[i], pt[1], pt[0]))
             add_to_output_array(i, pt)
 
-        def tojson(a, path):
+        def tojson(a, path, location, frames):
             b = a[1:,:] - a[:-1,:]
             c = b.flatten()
             d = np.dot(c,c)
-            go_nowhere = d < 0.001
+            go_nowhere = d < 0.005
 
             output = {}
+            output['location'] = location
+            output['frames'] = frames
             output['go_nowhere'] = 'true' if go_nowhere else 'false'
             if not go_nowhere:
                 output['path'] = a.tolist()
             json.dump(output, codecs.open(path, 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
 
-        tojson(op, "paths/{}-{:04d}x{:04d}.json".format(movie, x, y))
+        tojson(op, "paths/{}-{:04d}x{:04d}.json".format(movie, x, y), [x,y], frames)
 print("Batch processing COMPLETE!                ")

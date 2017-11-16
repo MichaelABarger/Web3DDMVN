@@ -44,66 +44,6 @@ The client-facing front-end web page will provide all input/output user interact
 \section{Back-End Preparation}
 Before we can implement the 3D DMVN front-end service, we need to first generate path data files from the provided video data.
 
-\subsection{Reverse Engineering}
-Since there was no description of the binary files associated with the videos provided, we needed to perform some reverse engineering in order to utilize them. We made the following observations:
-\begin{itemize}
-    \item The filenames were of the format \texttt{uvXXX.bin}, where \texttt{XXX} represents some integral value:
-    \begin{itemize}
-        \item \texttt{uv} appeared to refer to $(u,v)$ relative coordinates in common computer graphics nomenclature;
-        \item The range of numbers, always starting with \texttt{1}, seemed to correlate with the number of frames in the associated video file;
-        \item The files' extension was \texttt{.bin}, so the contents were likely binary.
-    \end{itemize}
-    \item All files had the exact same file size, reinforcing that these must be uncompressed binary files, and that the format of the contents must be related to the dimensions of the video in some way;
-    \item Since both videos were $640\times 360$, dividing their filesize by that product resulted in a per-pixel allotment of 16 Bytes. Divided in half (for the ${u,v}$ coordinates), this would allow for 8 Bytes per unit of information. If this were optical flow information, as we expected it might be, then it would seem that the datatype must be 64-bit floating point.
-    \item Inspecting the binary contents of the files through the \texttt{xxd} utility confirmed that there were repeating, regular patterns on 8-Byte boundaries.
-\end{itemize}\par
-Next, we attempt to read the files and display them on the screen: one common way to convert the $(u,v)$ (the optical flow vector of $\vec{\Delta p}=\langle \Delta x,\Delta y \rangle$) information to displayable colors is by converting the information to a representation in HSL space as a kind of polar visualization:
-\begin{eqnarray*}
-    h & = & \theta \\
-    s & = & 1 \\
-    l & = & \lVert \vec{\Delta p} \rVert
-\end{eqnarray*}
-where $\theta$ is the angle between $\vec{\Delta p}$ and the vertical unit vector $\langle 0,1 \rangle$. We can find the angle between those vectors by solving the definition of the vector dot product for $\theta$:
-\begin{eqnarray*}
-    \vec{a} \cdot \vec{b} & = & \lVert\vec{a}\rVert \lVert\vec{b}\rVert \cos\theta \\
-    \frac{ \vec{a} \cdot \vec{b}}{\lVert\vec{a}\rVert \lVert\vec{b}\rVert} & = & \cos\theta \\
-    \theta & = & \cos ^{-1} \frac{ \vec{a} \cdot \vec{b}}{\lVert \vec{a}\rVert \lVert \vec{b}\rVert}
-\end{eqnarray*}
-So, if $\vec{a} = \vec{\Delta p}$ and $\vec{b} = \langle 0,1 \rangle$, then this simplifies to:
-\begin{eqnarray*}
-    \theta & = & \cos ^{-1} \frac{ \vec{\Delta p} \cdot \langle 0,1 \rangle}{\lVert \vec{\Delta p} \rVert \lVert \langle 0,1 \rangle \rVert} \\
-    \theta & = & \cos ^{-1} \frac{ {\Delta p}_y }{\lVert \vec{\Delta p} \rVert}
-\end{eqnarray*}
-and thus our conversion from optical flow vector to HSL display pixel becomes:
-\begin{eqnarray*}
-    h & = & \cos ^{-1} \frac{ {\Delta p}_y }{\lVert \vec{\Delta p} \rVert} \\
-    s & = & 1 \\
-    l & = & \lVert \vec{\Delta p} \rVert
-\end{eqnarray*}
-However, the resulting visualization appeared to be spatially distorted, which can be seen in Figure~\ref{fig:flowc}.
-
-\begin{figure}[h]
-\centering
-\begin{minipage}[b]{0.4\textwidth}
-    \includegraphics[width=\textwidth]{FlowC1}
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.4\textwidth}
-    \includegraphics[width=\textwidth]{FlowC2}
-\end{minipage}
-\caption{Spatial Distortion of Improperly Read Flow Data, In Both Row-Col and Col-Row Orientations}
-\label{fig:flowc}
-\end{figure}
-
-\par After some thought, it occurred to me that perhaps these optical flow files were created through the MatLab SIFTFlow package; if that were the case, then perhaps the binary representation of the multidimensional array might be in Fortran order, rather than C order. This was the key, and the result can be seen in Figure~\ref{fig:flowf}.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=\textwidth]{FlowF}
-\caption{Flow Data Correctly Read With Fortran-Style Multidimensional Array Ordering}
-\label{fig:flowf}
-\end{figure}
-
 \subsection{Optical Flow}
 Optical Flow is a means of determining the motion of pixels from one frame of video to another. The binary files associated with the provided videos are optical flow data, providing a $\Delta \vec{p} = (\Delta x, \Delta y)$ for each pixel, for each frame of video. This $\Delta \vec{p}$ expresses how the optical flow algorithm determined the pixel from the first frame to the next.
 \par We intend on using this optical flow information to trace the path of motion from a starting pixel through each frame. We can define this algorithm recursively:
@@ -127,16 +67,16 @@ While it is always the case that our initial position is $\vec{p_0} \in \mathbb{
 and then perform Linear Interpolation as follows:
 \begin{equation}
 \begin{cases}
-    \vec{a} & = \text{lerp} (\vec{g}_1, \vec{g}_3, \{p_x\}) \\
-    \vec{b} & = \text{lerp} (\vec{g}_2, \vec{g}_4, \{p_x\}) \\
-    \vec{f}_{interp} & = \text{lerp} (\vec{a}, \vec{b}, \{p_y\})
+    \vec{a} & = \text{lerp} (\vec{g}_3, \vec{g}_1, \{p_x\}) \\
+    \vec{b} & = \text{lerp} (\vec{g}_4, \vec{g}_2, \{p_x\}) \\
+    \vec{f}_{interp} & = \text{lerp} (\vec{b}, \vec{a}, \{p_y\})
 \end{cases}
 \end{equation}
 where $\{x\}$ is the fractional portion of $x$, or $\{x\} = x - \lfloor x \rfloor$, and Linear Interpolation (lerp) is defined as:
 \begin{equation}
-    \text{lerp}(a, b, x) = ax + b(1-x)
+    \text{lerp}(\vec{a}, \vec{b}, x) = x\vec{a} + (1-x)\vec{b}
 \end{equation}
-and $0 \leq x \leq 1$.
+where $0 \leq x \leq 1$.
 
 \subsection{Path Generation}
 Now, using some programs  written in \texttt{python} with the \texttt{numpy} and \texttt{opencv} libraries, we generated path information for the web page to use. Ultimately, we intend to export the generated path as JSON information; in order to do so, we will convert the set of path coordinates from Video (Pixel) Space to Normalized Device Coordinates, with the $z$ coordinate set to be on $[0,1]$, where 0 is the first frame, and 1 is the final frame.

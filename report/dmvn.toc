@@ -1,0 +1,102 @@
+\contentsline {chapter}{\numberline {1}Scope}{3}
+\contentsline {section}{\numberline {1.1}Goals}{3}
+\contentsline {subsection}{\numberline {1.1.1}Direct Manipulation Video Navigation}{4}
+\contentsline {subsection}{\numberline {1.1.2}\emph {3D} Direction Manipulation Video Navigation}{4}
+\contentsline {subsection}{\numberline {1.1.3}Temporal Ambiguity}{4}
+\contentsline {subsubsection}{Recurring Motion}{5}
+\contentsline {subsubsection}{Self-intersecting Motion}{5}
+\contentsline {section}{\numberline {1.2}Limitations}{5}
+\contentsline {section}{\numberline {1.3}Materials}{5}
+\contentsline {section}{\numberline {1.4}Tools}{6}
+\contentsline {chapter}{\numberline {2}Implementation}{7}
+\contentsline {section}{\numberline {2.1}Systems Architecture}{7}
+\contentsline {subsection}{\numberline {2.1.1}Considerations}{7}
+\contentsline {subsubsection}{Network Bandwidth}{7}
+\contentsline {subsubsection}{Network Latency}{7}
+\contentsline {subsubsection}{Client Performance}{8}
+\contentsline {subsubsection}{Server (Back-End) Burden}{8}
+\contentsline {subsection}{\numberline {2.1.2}Architecture}{8}
+\contentsline {section}{\numberline {2.2}Back-End Preparation}{8}
+\contentsline {subsection}{\numberline {2.2.1}Reverse Engineering}{9}
+\contentsline {subsection}{\numberline {2.2.2}Optical Flow}{11}
+\contentsline {subsubsection}{Bilinear Interpolation for Subpixel Optical Flow Parameter}{11}
+\contentsline {subsection}{\numberline {2.2.3}Path Generation}{12}
+\contentsline {subsubsection}{Interactive Path Generation}{13}
+\contentsline {subsubsection}{Batch Path Generation}{13}
+\contentsline {section}{\numberline {2.3}World Wide Web}{14}
+\contentsline {subsection}{\numberline {2.3.1}Relevant Technologies}{14}
+\contentsline {subsubsection}{HTTP}{14}
+\contentsline {subsubsection}{HTML}{14}
+\contentsline {subsubsection}{CSS}{14}
+\contentsline {subsubsection}{DOM}{14}
+\contentsline {subsubsection}{JSON}{14}
+\contentsline {subsubsection}{JavaScript}{15}
+\contentsline {subsubsection}{WebGL}{15}
+\contentsline {section}{\numberline {2.4}Hardware-Accelerated Graphics}{15}
+\contentsline {subsection}{\numberline {2.4.1}Graphics Processing Units}{15}
+\contentsline {subsection}{\numberline {2.4.2}GPU APIs}{15}
+\contentsline {subsection}{\numberline {2.4.3}OpenGL Architecture}{16}
+\contentsline {section}{\numberline {2.5}3D DMVN WebGL Shader Programs}{17}
+\contentsline {subsection}{\numberline {2.5.1}Video Planar-Section Shader}{17}
+\contentsline {subsubsection}{Buffers \& Attributes}{17}
+\contentsline {subsubsection}{Textures}{18}
+\contentsline {subsubsection}{Uniforms}{18}
+\contentsline {subsubsection}{Vertex Shader}{18}
+\contentsline {subsubsection}{Fragment Shader}{18}
+\contentsline {subsection}{\numberline {2.5.2}Wire-Frame Box-Volume Shader}{18}
+\contentsline {subsubsection}{Buffers \& Attributes}{18}
+\contentsline {subsubsection}{Uniforms}{19}
+\contentsline {subsubsection}{Vertex Shader}{19}
+\contentsline {subsubsection}{Fragment Shader}{19}
+\contentsline {subsection}{\numberline {2.5.3}Motion Trajectory Path Shader}{19}
+\contentsline {subsubsection}{Buffers \& Attributes}{19}
+\contentsline {subsubsection}{Vertex Shader}{19}
+\contentsline {subsubsection}{Fragment Shader}{20}
+\contentsline {chapter}{\numberline {3}Mathematics}{21}
+\contentsline {section}{\numberline {3.1}Coordinate Systems}{21}
+\contentsline {subsection}{\numberline {3.1.1}Video (Pixel) Space}{21}
+\contentsline {subsection}{\numberline {3.1.2}Normalized Texture Coordinates}{22}
+\contentsline {subsection}{\numberline {3.1.3}Normalized Device Coordinates}{22}
+\contentsline {subsection}{\numberline {3.1.4}DOM Space}{22}
+\contentsline {section}{\numberline {3.2}Coordinate Transforms}{23}
+\contentsline {subsubsection}{Pixel Space $\mathaccentV {vec}17E{p}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{24}
+\contentsline {subsubsection}{Normalized Device Coordinates $\mathaccentV {vec}17E{n}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{24}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Video Space $\mathaccentV {vec}17E{v}$}{24}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to DOM Space $\mathaccentV {vec}17E{d}$}{24}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Normalized Device Coordinates $\mathaccentV {vec}17E{n}$}{24}
+\contentsline {section}{\numberline {3.3}Spatial Transforms}{24}
+\contentsline {subsection}{\numberline {3.3.1}Scaling Matrices}{24}
+\contentsline {subsection}{\numberline {3.3.2}Rotation Matrices}{24}
+\contentsline {subsubsection}{Rotation About the $x$ Axis}{24}
+\contentsline {subsubsection}{Rotation About the $y$ Axis}{24}
+\contentsline {subsection}{\numberline {3.3.3}Projection Matrices}{25}
+\contentsline {subsection}{\numberline {3.3.4}3D DMVN Matrices}{25}
+\contentsline {subsubsection}{Transform Matrix}{25}
+\contentsline {subsubsection}{Application}{25}
+\contentsline {section}{\numberline {3.4}DMVN Interactivity}{26}
+\contentsline {subsection}{\numberline {3.4.1}Rotating the Scene}{26}
+\contentsline {subsection}{\numberline {3.4.2}Temporal Navigation}{26}
+\contentsline {subsection}{\numberline {3.4.3}Path Pixel Selection}{26}
+\contentsline {section}{\numberline {3.5}Ray Tracing}{26}
+\contentsline {subsection}{\numberline {3.5.1}Designing a Parametric Intersection Equation}{27}
+\contentsline {subsection}{\numberline {3.5.2}Solving the Intersection Equation}{28}
+\contentsline {chapter}{\numberline {4}Future Work}{30}
+\contentsline {section}{\numberline {4.1}Frame Independence of Path Selection}{30}
+\contentsline {section}{\numberline {4.2}Mobile Device Support}{30}
+\contentsline {subsection}{\numberline {4.2.1}Fat Finger Problem}{30}
+\contentsline {subsection}{\numberline {4.2.2}Motion Sensors}{30}
+\contentsline {section}{\numberline {4.3}Optimization}{31}
+\contentsline {subsection}{\numberline {4.3.1}Server Data Reduction}{31}
+\contentsline {subsubsection}{Storage Format}{31}
+\contentsline {subsubsection}{Motionless Pixels}{31}
+\contentsline {subsubsection}{Path Resolution}{32}
+\contentsline {subsubsection}{Elision of $z$ Coordinate}{32}
+\contentsline {subsection}{\numberline {4.3.2}Client Performance}{32}
+\contentsline {section}{\numberline {4.4}Semantics \& Intuitiveness}{32}
+\contentsline {subsection}{\numberline {4.4.1}Semantically Interesting Motion}{32}
+\contentsline {subsubsection}{Incoherent Motion}{33}
+\contentsline {subsubsection}{Global Motion}{33}
+\contentsline {subsection}{\numberline {4.4.2}Immobile Regions}{33}
+\contentsline {subsection}{\numberline {4.4.3}Camera Motion}{33}
+\contentsline {subsection}{\numberline {4.4.4}Semantic Segmentation}{34}
+\contentsline {subsection}{\numberline {4.4.5}Scene-Change Detection}{34}

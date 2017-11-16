@@ -6,8 +6,8 @@
 As in most graphics applications, throughout our implementation we work with many different coordinate systems, and must convert between them.
 
 \subsection{Video (Pixel) Space}
-When operating on the video frames in Python using \texttt{opencv} and \texttt{numpy}, we generally consider those images as matrices (where each pixel is an element), and so use standard mathematical row-column indexing: $M_{ij}$, where $i$ is the row and $j$ is the column. This translates to $M_{yx}$, where $y$ is the vertical coordinate and $x$ the horizontal, which may be counterintuitive to some graphics programmers.
-\setlength{\unitlength}{0.04cm}
+When operating on the video frames in Python using \texttt{opencv} and \texttt{numpy}, we generally consider those images as matrices (where each pixel is an element), and so use standard mathematical row-column indexing: $M_{ij}$, where $i$ is the row and $j$ is the column. This translates to $M_{yx}$, where $y$ is the vertical coordinate and $x$ the horizontal.
+\setlength{\unitlength}{0.05cm}
 \begin{figure}[h]
 \centering
 \begin{picture}(100, 100)
@@ -15,16 +15,18 @@ When operating on the video frames in Python using \texttt{opencv} and \texttt{n
 \put(5, 95){\vector(0, -1){95}}
 \put(5, 95){\vector(1, 0){95}}
 \put(5, 95){\circle*{3}}
-\put(7, 74){$(0,0)$}
-\put(75, 85){$(0,639)$}
-\put(8, 0){$(359,0)$}
+\put(7, 74){$\langle0,0\rangle$}
+\put(75, 85){$\langle0,w-1\rangle$}
+\put(8, 0){$\langle h-1,0\rangle$}
 \thinlines
 \put(5, 95){\vector(3,-2){50}}
 \put(56, 61){\circle*{2}}
-\put(55, 50){$(y,x) | y \in [0, 360) \subset \mathbb{N}, x \in [0, 640) \subset \mathbb{N}$}
+\put(55, 50){$\langle y,x \rangle | y \in [0, h) \subset \mathbb{N}, x \in [0, w) \subset \mathbb{N}$}
 \end{picture}
 \caption{Video (Pixel) Space}
+\label{videospace}
 \end{figure}
+\par Figure \ref{videospace} shows how the coordinate space is defined, where $w$ is the video width in pixels, and $h$ is its height.
 
 \subsection{Normalized Texture Coordinates}
 OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from textures, through \emph{Normalized Texture Coordinates}. Unlike many other image/texture addressing systems, this system uses real numbers instead of natural numbers, as the GPU Texture Unit hardware will perform bilinear interpolation to enable subpixel fetching.
@@ -35,9 +37,9 @@ OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from te
 \put(5, 95){\vector(0, -1){95}}
 \put(5, 95){\vector(1, 0){95}}
 \put(5, 95){\circle*{3}}
-\put(7, 74){$(0,0)$}
-\put(75, 85){$(1,0)$}
-\put(8, 0){$(0,1)$}
+\put(7, 74){$\langle0,0\rangle$}
+\put(75, 85){$\langle1,0\rangle$}
+\put(8, 0){$\langle0,1\rangle$}
 \thinlines
 \put(5, 95){\vector(3,-2){50}}
 \put(56, 61){\circle*{2}}
@@ -67,7 +69,7 @@ Normalized Device Coordinates (NDC) are the only 3D coordinate system used in ou
 \thinlines
 \put(49, 49){\vector(-1, 2){10}}
 \put(38, 70){\circle*{2}}
-\put(0, 78){$(x,y,z)|x,y,z \in [0,1] \subset \mathbb{R}$}
+\put(0, 78){$\langle x,y,z\rangle |x,y,z \in [0,1] \subset \mathbb{R}$}
 \end{picture}
 \caption{OpenGL Normalized Device Coordinates}
 \end{figure}
@@ -87,13 +89,13 @@ In the context of HTML pages, positions (particularly: mouse positions and such)
 \put(5, 95){\vector(0, -1){95}}
 \put(5, 95){\vector(1, 0){95}}
 \put(5, 95){\circle*{3}}
-\put(7, 74){$(0,0)$}
-\put(75, 85){$(w-1,0)$}
-\put(8, 0){$(0,h-1)$}
+\put(7, 74){$\langle0,0\rangle$}
+\put(75, 85){$\langle w-1,0 \rangle$}
+\put(8, 0){$\langle 0,h-1 \rangle$}
 \thinlines
 \put(5, 95){\vector(3,-2){50}}
 \put(56, 61){\circle*{2}}
-\put(55, 50){$(x,y) | x \in [0, w) \subset \mathbb{N}, y \in [0, h) \subset \mathbb{N}$}
+\put(55, 50){$\langle x,y\rangle | x \in [0, w) \subset \mathbb{N}, y \in [0, h) \subset \mathbb{N}$}
 \end{picture}
 \caption{DOM Space}
 \end{figure}
@@ -115,12 +117,12 @@ We can use simple linear operations to convert between these coordinate spaces. 
 
 \subsubsection{Normalized Texture Coordinates $\vec{t}$ to Video Space $\vec{v}$}
 \begin{equation}
-    \vec{v} = \langle ht_y, wt_x \rangle
+    \vec{v} = \langle (h-1)t_y, (w-1)t_x \rangle
 \end{equation}
 
 \subsubsection{Normalized Texture Coordinates $\vec{t}$ to DOM Space $\vec{d}$}
 \begin{equation}
-    \vec{d} = \langle wt_x, ht_y \rangle
+    \vec{d} = \langle (w-1)t_x, (h-1)t_y \rangle
 \end{equation}
 
 \subsubsection{Normalized Texture Coordinates $\vec{t}$ to Normalized Device Coordinates $\vec{n}$}
