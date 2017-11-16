@@ -5,34 +5,42 @@ var mouseEvent = {active: 'none'};
 var attitude = {x: 0.0, y: 0.0};
 var xform = m_identity();
 
-const SHRINK_FACTOR = 0.8;
 var videoAspect = 1.0, canvasAspect = 1.0;
+var videoWidth, videoHeight;
 
-const ATTITUDE_MAX = 90.0;
 
-
-const IP = '[2601:1c2:4b00:bf:bcc0:5698:e0d3:d03b]';
-const VIDEO = 'painting1'; //'gym1';
+// CONSTANTS
+const SHRINK_FACTOR = 0.8;
+const ATTITUDE_MAX = 45.0;
+const VIDEO = 'gym1';
 const FETCH_MODE = {method: 'get', mode: 'no-cors', redirect: 'follow', headers: new Headers({'Content-Type': 'text/plain'})};
 
 
 
-function generatePath (time) {
+function generatePath (time)
+// Generate the transformed path vertices
+// We're doing this on the CPU because we need this transformed path for
+//  mouse navigation.
+{
     for (var i = 0; i < path.length; i++) {
         var pt = [path[i][0], path[i][1], path[i][2]];
-        var z = pt[2] - time;
+        const z = pt[2] - time;
         pt[2] = z;
         var xformed_vec = m_apply(xform, pt);
         xformed_path[i] = [xformed_vec[0], xformed_vec[1], z, path[i][2]];
         // 3rd element can be thought of as "offset from current time (=0)"
         // 4th element is more like a unique identifier
     }
+    // update the path shader's path buffer with the transformed path
     gl.useProgram(gl.programs.path.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.programs.path.buffers.position);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_.flatten(xformed_path)), gl.DYNAMIC_DRAW);
 }
 
-function regenerateXforms () {
+
+function regenerateXforms ()
+// Regenerate the transform matrix
+{
     if (!ready)
         return;
 
@@ -54,7 +62,9 @@ function regenerateXforms () {
 }
 
 
-function initGL (video) {
+function initGL (video)
+// Initialize OpenGL
+{
     gl.clearColor(0.1, 0.1, 0.25, 1.0);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -77,7 +87,7 @@ function initGL (video) {
         var downloadShader = (type) => {
             var extension = type == gl.VERTEX_SHADER ? 'vs' : 'fs';
             var t = type == gl.VERTEX_SHADER ? 'vertex' : 'fragment';
-            var uri = `http://${IP}/dmvn/shader/${name}.${extension}`;
+            var uri = `shader/${name}.${extension}`;
             return fetch(uri, FETCH_MODE)
                 .then((response) => response.text(), () => alert(`Could not download ${uri} (${name} ${t} shader)!`))
                 .then((src) => compileShader(src, type));
@@ -86,7 +96,7 @@ function initGL (video) {
     };
     var video_src = downloadShaders('dmvn');
     var path_src = downloadShaders('path');
-    var path_req = fetch(`http://${IP}/dmvn/res/${VIDEO}.json`, FETCH_MODE)
+    var path_req = fetch(`res/${VIDEO}.json`, FETCH_MODE)
         .then((response) => response.json(), () => alert("Could not download Path JSON!"))
         .then((json) => path_json = json);
     var box_src = downloadShaders('box');
@@ -199,7 +209,9 @@ function initGL (video) {
 
 
         // UNIFORMS
-        videoAspect = parseFloat(video.videoHeight) / parseFloat(video.videoWidth);
+        videoWidth = parseFloat(video.videoWidth);
+        videoHeight = parseFloat(video.videoHeight);
+        videoAspect = videoHeight / videoWidth;
 
         gl.useProgram(gl.programs.video.program);
         gl.programs.video.uniforms = {};
@@ -297,11 +309,32 @@ document.addEventListener('DOMContentLoaded', () => {
             var pix = [parseInt(Math.round(uv[0] * video.videoWidth)), parseInt(Math.round(uv[1] * video.videoHeight))];
             var xs = to_s(pix[0]);
             var ys = to_s(pix[1]);
-            fetch(`http://${IP}/dmvn/res/${VIDEO}/${VIDEO}-${xs}x${ys}.json`, FETCH_MODE)
+            fetch(`res/${VIDEO}/${VIDEO}-${xs}x${ys}.json`, FETCH_MODE)
                 .then((response) => response.json(), () => alert("Could not download new Path JSON!"))
                 .then((json) => {
-                    path_json = json;
-                    path = json.path;
+                    const fr = parseFloat(path_json.frames) - 1.0;
+                    const genpath = (p) => {
+                        for (var i = 0; i < path_json.frames; i++) {
+                            p[i][2] = parseFloat(i) / fr;
+                        }
+                        return p;
+                    };
+                    if (json.go_nowhere == "true") {
+                        /* OPTION 1: make a "straight line" at selected pixel
+                        const loc = [
+                            2.0 * path_json.location[0] / video.videoWidth - 1.0,
+                            -2.0 * path_json.location[1] / video.videoHeight + 1.0
+                        ];
+                        path_json.path = genpath(_.times(path_json.frames, () => [loc[0], loc[1]]));
+                        */
+                        /* OPTION 2: reject selected pixel; stay with previous */
+                        return;
+                    } else {
+                        path_json = json;
+                        path_json.go_nowhere = path_json.go_nowhere == "true";
+                        path_json.path = genpath(path_json.path);
+                        path = json.path;
+                    }
                 });
         }
         mouseEvent.active = 'none';
@@ -342,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 x = 2.0 * x / canvas.clientWidth - 1.0;
                 y = -2.0 * y / canvas.clientHeight + 1.0;
                 var closest;
-                var shortest_dist_sq = 100.0;
+                var shortest_dist_sq = 10000.0;
                 for (var i = 0; i < xformed_path.length; i++) {
                     var dx = x - xformed_path[i][0];
                     var dy = y - xformed_path[i][1];
