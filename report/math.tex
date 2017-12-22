@@ -6,6 +6,7 @@
 As in most graphics applications, throughout our implementation we work with many different coordinate systems, and must convert between them.
 
 \subsection{Video (Pixel) Space}
+\label{videospc}
 When operating on the video frames in Python using \texttt{opencv} and \texttt{numpy}, we generally consider those images as matrices (where each pixel is an element), and so use standard mathematical row-column indexing: $M_{ij}$, where $i$ is the row and $j$ is the column. This translates to $M_{yx}$, where $y$ is the vertical coordinate and $x$ the horizontal.
 \setlength{\unitlength}{0.05cm}
 \begin{figure}[h]
@@ -48,6 +49,7 @@ OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from te
 \caption{Normalized Texture Coordinates}
 \end{figure}
 \subsection{Normalized Device Coordinates}
+\label{ndcspace}
 Normalized Device Coordinates (NDC) are the only 3D coordinate system used in our project. It is used by OpenGL: the Vertex Shader stage must present a vertex position to the rendering engine in this coordinate space. A left-handed $\mathbb{R}^3$ space where $x$, $y$, and $z$ are all on $[-1, 1]$, any draw primitive (usually a triangle) where all vertices are outside of that domain will be clipped (not rendered).
 \begin{figure}[h]
 \centering
@@ -181,14 +183,12 @@ The transformations that must be performed are, in order:
     \item The Projection Matrix, which is simply a Scaling Matrix to correct for the \texttt{canvas} element's (viewport's) aspect ratio $\eta_{viewport}$.
 \end{enumerate}
 This Transform Matrix $T$ is derived as follows:
-\begin{equation}
-\begin{cases}
+\begin{align}
     S' & = S(\rho, \rho \eta_{video}, 1) \\
     R' & = R_y(\theta) R_x(\phi) \\
     P' & = S(1, \eta_{viewport}, 1) \\
     T & = P' R' S'
-\end{cases}
-\end{equation}
+\end{align}
 
 \subsubsection{Application}
 For the drawing of the Video Box itself, we apply the transform matrix $T$ to each vertex $\vec{v}$ of the video rectangle to obtain the transformed vertex $\vec{v}'$:
@@ -196,15 +196,13 @@ For the drawing of the Video Box itself, we apply the transform matrix $T$ to ea
     \vec{v}' = T \vec{v}
 \end{equation}
 \par For the path and box, since we want them to move translationally with video time $0 \leq t \leq 1$, we first modify each vertex's $z$ coordinate before applying the transform matrix:
-\begin{equation}
-\begin{cases}
+\begin{align}
     \vec{v}' & = \langle v_x, v_y, v_z - t \rangle \\
     \vec{v}'' & = T \vec{v}'
-\end{cases}
-\end{equation}
+\end{align}
 
 \section{DMVN Interactivity}
-The user interacts with the DMVN three different ways:
+The user interacts (Section \ref{ui}) with the Web 3D DMVN demonstration in three different ways:
 \begin{enumerate}
 \item rotating the video and path;
 \item dragging along the path to temporally navigate the video; and
@@ -212,31 +210,33 @@ The user interacts with the DMVN three different ways:
 \end{enumerate}
 
 \subsection{Rotating the Scene}
-Whenever the user \emph{right-click drags} their mouse, we translate the mouse movement in $(x,y)$ DOM Space to Euler angles (yaw and pitch, $\phi$ and $\theta$), ensuring that neither $\phi$ nor $\theta$ never exceed $\pm45\deg$. $\phi$ and $\theta$ are used in the generation of the 3D $x$ and $y$ rotation matrices for our 3D DMVN Matrix.
+Whenever the user \emph{right-click drags} their mouse (Section \ref{uirmb}), we translate the mouse movement in $(x,y)$ DOM Space to Euler angles (yaw and pitch, $\phi$ and $\theta$), ensuring that neither $\phi$ nor $\theta$ never exceed $\pm45\deg$. $\phi$ and $\theta$ are used in the generation of the 3D $x$ and $y$ rotation matrices for our 3D DMVN Matrix.
 
 \subsection{Temporal Navigation}
-Clicking the left mouse button triggers temporal navigation. While holding the button down and dragging, we iterate over the entire set of path points $\vec{p}$ and choose a ``nearest" one to the normalized mouse location $\vec{m}$ as follows:
+\label{temporalnav}
+Clicking the left mouse button (Section \ref{uilmb}) triggers temporal navigation. While holding the button down and dragging, we iterate over the entire set of path points $\vec{p}$ and choose a ``nearest" one to the normalized mouse location $\vec{m}$ as follows:
 \begin{equation}
+\label{tempcoh}
     t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2 + \kappa (p_t - m_t)^2}
 \end{equation}
-This is a straightforward Euclidean distance between our ``point of selection" $\vec{m}$ and $\vec{p}$. $t$ is the time of the current video frame, and $\kappa$ is a scaling constant meant to be tuned to allow for smooth navigation. (We found $\kappa=.9$ to work well.)
-\par We did find preferable behavior in using a simpler, atemporal distance when doing the ``initial seek":
+This is a straightforward Euclidean distance between our ``point of selection" $\vec{m}$ and $\vec{p}$. $t$ is the time of the current video frame, and $\kappa$ is a scaling constant meant to be tuned to allow for smooth navigation. (We found $\kappa=.9$ to work well for our particular screen, but it seems like its performance may be dependent on screen/window resolution.)
+\par We did find preferable behavior in using a simpler, atemporal distance (Equation \ref{notempcoh}) when doing the ``initial seek":
 \begin{equation}
+\label{notempcoh}
     t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2}
 \end{equation}
-as when a user initially clicks to begin navigation, they are rarely considering temporal coherence.
+as when a user initially clicks to begin navigation, they are rarely considering temporal coherence. However, while dragging we use Equation \ref{tempcoh}.
 \par We did optimize the performance of the code by removing the square-root operation, since it isn't ultimately relevant to the result, as
 \begin{equation}
     \arg \min \sqrt x_i = \arg \min x_i
 \end{equation}
 
+
+
 \subsection{Path Pixel Selection}
-
-
-
-\section{Ray Tracing}
-We wanted the user to be able to select a pixel from the video, regardless of the current orientation of that video in $\mathbb{R}^3$ space and despite all of those above transforms. In order to do this, we must cast a ray where the user middle-clicks with their mouse, down into that $\mathbb{R}^3$ space, and determine its point of intersection with the planar surface of the video in a way in which we can then determine the pixel coordinates of such intersection.\par
-\subsection{Designing a Parametric Intersection Equation}
+\label{raytracing}
+When selecting a new pixel from which to generate a motion trajectory path for navigation (Section \ref{uimmb}), we must perform \emph{ray tracing} to determine which pixel was selected by the user in order to take into account the current orientation of that video in $\mathbb{R}^3$ space and despite all of those above transforms. In order to do this, we must cast a ray where the user middle-clicks with their mouse, down into that $\mathbb{R}^3$ space, and determine its point of intersection with the planar surface of the video in a way in which we can then determine the pixel coordinates of such intersection.\par
+\subsubsection{Designing a Parametric Intersection Equation}
     We decided to solve this problem by expressing it as a system of parametric vector equations. Since our video surface, prior to transformations, exists as a "full-screen quad" in the XY plane from $[-1,1]$, we start with three points on that quad: the upper-left corner $\vec{a}=\langle-1,1,0\rangle$, the upper-right corner $\vec{b}=\langle1,1,0\rangle$, and the lower-left corner $\vec{c}=\langle1,-1,0\rangle$. Then, we apply our global scaling/rotation transformation matrix, $M$ to those three points; for example, $\vec{a}'=M\vec{a}$.\par
     The parametric form of a plane can be expressed as $\vec{p_0}+\vec{u}s+\vec{v}t$, where $\vec{p_0}$ is any reference point on that plane, and $\vec{u}$ and $\vec{v}$ are any rays along its surface. In order to utilize this parametric form to solve my problem, I will let $\vec{u}$ define the horizontal axis of my video frame on $[0,1]$, and $\vec{v}$ represent the vertical axis of my video frame, also on $[0,1]$, similar to the \emph{Normalized Texture Coordinates} described above. By doing this, we can easily convert these normalized coordinates to pixel coordinates, and we can also easily test for rays that do not intersect the transformed video plane by checking if the point of intersection lies outside of $[0,1]$ regardless of the pixel dimensions of the video.\par
     Since $\vec{a}'$ is the origin of our desired coordinate space, we will use it as $\vec{p_0}$. As $\vec{b}'$ is also the point where the horizontal axis of the video is maximally in bounds, we can define $\vec{u}=\vec{b}'-\vec{a}'$; similarly, for the vertical axis we can define $\vec{v}=\vec{c}'-\vec{a}'$. It follows, then, that we can express any point $\vec{z}$ on our plane as
@@ -253,7 +253,7 @@ where $s$ and $t$ are the parametric variables.\par
     \vec{a}'+\vec{u}s+\vec{v}t=\langle m_x, m_y, 0 \rangle + \langle 0, 0, -1 \rangle r
     \end{equation}
 
-\subsection{Solving the Intersection Equation}
+\subsubsection{Solving the Intersection Equation}
 While our parametric equation above is in vector notation, it could equivalently described as a system of equations as follows:
     \begin{equation}
     \begin{cases}
@@ -310,3 +310,24 @@ This simultaneous equation can then be expressed as a matrix equation by separat
     \item The inverse matrix $A^{-1}$ is the Adjugate divided by the determinate of $A$: $A^{-1}=\frac{\text{adj}A}{|A|}$
 
 \end{enumerate}
+
+\section{Paring of ``Unmoving" Paths}
+\label{paring}
+While paths are being generated for all pixels of a video, we will notice that most pixels' paths do not go anywhere, nor do they suggest the substantial movement of an object within the scene. Through experimentation, we found the following metric most useful:
+
+\begin{align}
+    \vec{\Delta P_n}  &= \vec{P_{n+1}} - \vec{P_n} \\
+    \delta  &= \sum (\vec{\Delta P_n} \cdotp \vec{\Delta P_n}) \\
+    \psi  &\impliedby (\delta < \frac{f}{\chi}) \\
+    \chi  &\approx 36000
+\end{align}
+
+where
+\begin{itemize}
+\item $P$ is the ordered list of 2D path points on $[-1,1]$;
+\item $\vec{\Delta P}$ is the ordered list of the differences between neighboring points in $P$;
+\item $\delta$ is the total sum-of-squares metric; and
+\item $f$ is the number of frames in the video; and
+\item $\chi$ is an arbitrary constant subjectively selected to provide sufficient culling
+\item $\psi$ is a Boolean indicating if the pixel's path should be considered to be ``unmoving".
+\end{itemize}

@@ -1,0 +1,72 @@
+\BOOKMARK [0][-]{chapter.1}{Project Scope}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Goals}{chapter.1}% 2
+\BOOKMARK [2][-]{subsection.1.1.1}{Objective}{section.1.1}% 3
+\BOOKMARK [2][-]{subsection.1.1.2}{Direct Manipulation Video Navigation}{section.1.1}% 4
+\BOOKMARK [2][-]{subsection.1.1.3}{3D Direction Manipulation Video Navigation}{section.1.1}% 5
+\BOOKMARK [1][-]{section.1.2}{Limitations}{chapter.1}% 6
+\BOOKMARK [1][-]{section.1.3}{Materials}{chapter.1}% 7
+\BOOKMARK [1][-]{section.1.4}{Tools}{chapter.1}% 8
+\BOOKMARK [1][-]{section.1.5}{Deliverables}{chapter.1}% 9
+\BOOKMARK [0][-]{chapter.2}{Hypothesis}{}% 10
+\BOOKMARK [1][-]{section.2.1}{Background}{chapter.2}% 11
+\BOOKMARK [2][-]{subsection.2.1.1}{Static HTTP Server}{section.2.1}% 12
+\BOOKMARK [2][-]{subsection.2.1.2}{Dynamic HTTP Server}{section.2.1}% 13
+\BOOKMARK [1][-]{section.2.2}{Proposition}{chapter.2}% 14
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 15
+\BOOKMARK [1][-]{section.3.1}{Systems Architecture}{chapter.3}% 16
+\BOOKMARK [2][-]{subsection.3.1.1}{Considerations}{section.3.1}% 17
+\BOOKMARK [2][-]{subsection.3.1.2}{Architecture}{section.3.1}% 18
+\BOOKMARK [1][-]{section.3.2}{Back-End Preparation}{chapter.3}% 19
+\BOOKMARK [2][-]{subsection.3.2.1}{Optical Flow}{section.3.2}% 20
+\BOOKMARK [2][-]{subsection.3.2.2}{Path Generation}{section.3.2}% 21
+\BOOKMARK [1][-]{section.3.3}{World Wide Web}{chapter.3}% 22
+\BOOKMARK [2][-]{subsection.3.3.1}{Relevant Technologies}{section.3.3}% 23
+\BOOKMARK [2][-]{subsection.3.3.2}{User Interface}{section.3.3}% 24
+\BOOKMARK [1][-]{section.3.4}{Hardware-Accelerated Graphics}{chapter.3}% 25
+\BOOKMARK [2][-]{subsection.3.4.1}{GPU APIs}{section.3.4}% 26
+\BOOKMARK [2][-]{subsection.3.4.2}{OpenGL Architecture}{section.3.4}% 27
+\BOOKMARK [1][-]{section.3.5}{3D DMVN WebGL Shader Programs}{chapter.3}% 28
+\BOOKMARK [2][-]{subsection.3.5.1}{Video Planar-Section Shader}{section.3.5}% 29
+\BOOKMARK [2][-]{subsection.3.5.2}{Wire-Frame Box-Volume Shader}{section.3.5}% 30
+\BOOKMARK [2][-]{subsection.3.5.3}{Motion Trajectory Path Shader}{section.3.5}% 31
+\BOOKMARK [1][-]{section.3.6}{Storage Requirement Reduction}{chapter.3}% 32
+\BOOKMARK [2][-]{subsection.3.6.1}{Motionless Pixels}{section.3.6}% 33
+\BOOKMARK [2][-]{subsection.3.6.2}{Elision of z Coordinate}{section.3.6}% 34
+\BOOKMARK [0][-]{chapter.4}{Mathematics}{}% 35
+\BOOKMARK [1][-]{section.4.1}{Coordinate Systems}{chapter.4}% 36
+\BOOKMARK [2][-]{subsection.4.1.1}{Video \(Pixel\) Space}{section.4.1}% 37
+\BOOKMARK [2][-]{subsection.4.1.2}{Normalized Texture Coordinates}{section.4.1}% 38
+\BOOKMARK [2][-]{subsection.4.1.3}{Normalized Device Coordinates}{section.4.1}% 39
+\BOOKMARK [2][-]{subsection.4.1.4}{DOM Space}{section.4.1}% 40
+\BOOKMARK [1][-]{section.4.2}{Coordinate Transforms}{chapter.4}% 41
+\BOOKMARK [1][-]{section.4.3}{Spatial Transforms}{chapter.4}% 42
+\BOOKMARK [2][-]{subsection.4.3.1}{Scaling Matrices}{section.4.3}% 43
+\BOOKMARK [2][-]{subsection.4.3.2}{Rotation Matrices}{section.4.3}% 44
+\BOOKMARK [2][-]{subsection.4.3.3}{Projection Matrices}{section.4.3}% 45
+\BOOKMARK [2][-]{subsection.4.3.4}{3D DMVN Matrices}{section.4.3}% 46
+\BOOKMARK [1][-]{section.4.4}{DMVN Interactivity}{chapter.4}% 47
+\BOOKMARK [2][-]{subsection.4.4.1}{Rotating the Scene}{section.4.4}% 48
+\BOOKMARK [2][-]{subsection.4.4.2}{Temporal Navigation}{section.4.4}% 49
+\BOOKMARK [2][-]{subsection.4.4.3}{Path Pixel Selection}{section.4.4}% 50
+\BOOKMARK [1][-]{section.4.5}{Paring of ``Unmoving" Paths}{chapter.4}% 51
+\BOOKMARK [0][-]{chapter.5}{Conclusions}{}% 52
+\BOOKMARK [1][-]{section.5.1}{Observations}{chapter.5}% 53
+\BOOKMARK [1][-]{section.5.2}{Dynamic Service Request-Time Test}{chapter.5}% 54
+\BOOKMARK [1][-]{section.5.3}{Results}{chapter.5}% 55
+\BOOKMARK [0][-]{chapter.6}{Future Work}{}% 56
+\BOOKMARK [1][-]{section.6.1}{Dynamic Web Server Implementation}{chapter.6}% 57
+\BOOKMARK [1][-]{section.6.2}{Alternative Data Storage Methods}{chapter.6}% 58
+\BOOKMARK [2][-]{subsection.6.2.1}{Utilization of Video Compression}{section.6.2}% 59
+\BOOKMARK [2][-]{subsection.6.2.2}{Blob Flow}{section.6.2}% 60
+\BOOKMARK [1][-]{section.6.3}{Mobile Device Support}{chapter.6}% 61
+\BOOKMARK [2][-]{subsection.6.3.1}{Fat Finger Problem}{section.6.3}% 62
+\BOOKMARK [2][-]{subsection.6.3.2}{Motion Sensors}{section.6.3}% 63
+\BOOKMARK [1][-]{section.6.4}{Optimization}{chapter.6}% 64
+\BOOKMARK [2][-]{subsection.6.4.1}{Server Data Reduction}{section.6.4}% 65
+\BOOKMARK [2][-]{subsection.6.4.2}{Client Performance}{section.6.4}% 66
+\BOOKMARK [1][-]{section.6.5}{Semantics \046 Intuitiveness}{chapter.6}% 67
+\BOOKMARK [2][-]{subsection.6.5.1}{Semantically Interesting Motion}{section.6.5}% 68
+\BOOKMARK [2][-]{subsection.6.5.2}{Immobile Regions}{section.6.5}% 69
+\BOOKMARK [2][-]{subsection.6.5.3}{Camera Motion}{section.6.5}% 70
+\BOOKMARK [2][-]{subsection.6.5.4}{Semantic Segmentation}{section.6.5}% 71
+\BOOKMARK [2][-]{subsection.6.5.5}{Scene-Change Detection}{section.6.5}% 72

@@ -1,0 +1,60 @@
+\chapter{Conclusions}
+
+\section{Observations}
+The method we used for implementation of web-based 3D DMVN did not produce the results that we expected from our hypothesis. (See Section \ref{hypothesis}.) Specifically:
+\begin{enumerate}
+\item The \textbf{storage space requirements were sometimes larger and sometimes smaller} than the raw optical flow data. While further optimization is possible, to make meaningful gains it would have to be a substantial change (ex. H.264 video encoding of motion data or blob segmentation and tracking). However, storage size of the path data is improved substantially through ZIP encoding, which may help when using a static web server that is capable of serving compressed data.
+\item The \textbf{response time of the sample dynamic web service was substantially faster than 0.5 seconds} (Section \ref{conclusiontime}), \emph{as long as the optical flow maps are stored wholly in primary memory}. When the optical flow data cannot be persisted in primary memory, the request times would be much larger than 0.5 seconds. The requirement for primary memory locality would scale poorly due to finite system resources, and suggests that other avenues would need to be explored.
+\end{enumerate}
+
+\section{Dynamic Service Request-Time Test}
+We wrote a very simple command-line program that would generate the JSON path for a single pixel from optical flow data, and added time-tracking to account for both the loading of binary flow data from secondary storage to primary storage and the traversal of that information to calculate the trajectory.
+
+\section{Results}
+
+\begin{figure}
+\centering
+\caption{Optical Flow / Path Data Storage Requirements}
+\label{conclusionresults}
+\begin{tabular}{l | r | r}
+\textbf{Stored Data} & \textbf{\textit{Gym}} (MiB) & \textbf{\textit{Painting}} (MiB) \\
+\hline
+Optical Flow Binary & 633 & 1100 \\
+ZIP-compressed Optical Flow & 416 & 693 \\
+JSON Path (original) & 4630 & 8100 \\
+JSON Path (removal of $z$ coordinate) & 3100 & 5400 \\
+JSON Path (w/ motionless paring) & 281 & 720 \\
+JSON Path (and w/ ZIP compression) & 45 & 115
+\end{tabular}
+\end{figure}
+
+\par While we were able to achieve significant savings compared to the original JSON path implementation (see Figure \ref{conclusionresults}), our methodology for doing so was content dependent and could not result in consistent and predictable reduction of path data. 
+
+\par In Figure \ref{conclusionvideo} we can visualize the storage requirements of the video data alone, which we can compare the optical flow and path data storage requirements in Figure \ref{conclusionresults} to serve as a demonstration of how poorly our data compression performs compared to commonly-used video compression algorithms.
+
+\par Finally, in Figure \ref{conclusiontime} we can see the response time of a quick sample implementation of a dynamic web service, both with the optical flow data stored on secondary memory and on primary memory. The results suggest that the potential of the dynamic HTTP server approach should be investigated further.
+
+\begin{figure}
+\centering
+\caption{Video Storage Requirements}
+\label{conclusionvideo}
+\begin{tabular}{l | r | r}
+\textbf{Type} & \textbf{\textit{Gym}} (MiB) & \textbf{\textit{Painting}} (MiB) \\
+\hline
+Original AVI & 119 & 209 \\
+H.264 Encoded & 0.244 & 0.652 \\
+\end{tabular}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{Dynamic Request Service Time}
+\label{conclusiontime}
+\begin{tabular}{l | r}
+\textbf{Stage} & \textbf{\textit{Gym}} (s) \\
+\hline
+Optical flow data from secondary to primary memory & 2.89 \\
+Generating single pixel motion trajectory from optical flow in primary memory & 0.03
+\end{tabular}
+\end{figure}
+
