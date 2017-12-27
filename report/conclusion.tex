@@ -4,7 +4,7 @@
 The method we used for implementation of web-based 3D DMVN did not produce the results that we expected from our hypothesis. (See Section \ref{hypothesis}.) Specifically:
 \begin{enumerate}
 \item The \textbf{storage space requirements were sometimes larger and sometimes smaller} than the raw optical flow data. While further optimization is possible, to make meaningful gains it would have to be a substantial change (ex. H.264 video encoding of motion data or blob segmentation and tracking). However, storage size of the path data is improved substantially through ZIP encoding, which may help when using a static web server that is capable of serving compressed data.
-\item The \textbf{response time of the sample dynamic web service was substantially faster than 0.5 seconds} (Section \ref{conclusiontime}), \emph{as long as the optical flow maps are stored wholly in primary memory}. When the optical flow data cannot be persisted in primary memory, the request times would be much larger than 0.5 seconds. The requirement for primary memory locality would scale poorly due to finite system resources, and suggests that other avenues would need to be explored.
+\item The \textbf{response time of the sample dynamic web service was substantially faster than 0.5 seconds} (Section \ref{conclusiontime}), \emph{as long as the optical flow maps are stored wholly in primary memory}. When the optical flow data cannot be persisted in primary memory, the request times are much larger than 0.5 seconds. The requirement for primary memory locality would scale poorly due to finite system resources, and suggests that other avenues would need to be explored.
 \end{enumerate}
 
 \section{Dynamic Service Request-Time Test}
@@ -51,10 +51,11 @@ H.264 Encoded & 0.244 & 0.652 \\
 \caption{Dynamic Request Service Time}
 \label{conclusiontime}
 \begin{tabular}{l | r}
-\textbf{Stage} & \textbf{\textit{Gym}} (s) \\
+\textbf{Operation} & \textbf{\textit{Gym}} (s) \\
 \hline
-Optical flow data from secondary to primary memory & 2.89 \\
-Generating single pixel motion trajectory from optical flow in primary memory & 0.03
+Trajectory from optical flow in secondary memory & 2.92 \\
+Transfer of flow data from secondary to primary memory & 2.89 \\
+Trajectory from optical flow in primary memory & 0.03
 \end{tabular}
 \end{figure}
 

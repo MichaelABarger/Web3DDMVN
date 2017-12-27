@@ -29,7 +29,7 @@ It may be possible to utilize widespread browser-compatible video compression te
 \end{itemize}
 
 \subsection{Blob Flow}
-Instead of a per-pixel basis, selection and navigation could be performed using blob information. There would be many challenges in successfully extracting and tracking semantically meaningful blobs through a scene, but if achieved, the data requirements would drop to a fraction of the current storage requirements.
+Instead of a per-pixel basis, selection and navigation could be performed using blob information. There would be many challenges in successfully extracting and tracking semantically meaningful blobs through a scene, but if achieved, the data requirements would drop to a mere fraction of the current storage requirements.
 
 
 \section{Mobile Device Support}
@@ -40,13 +40,13 @@ The Web now enjoys a substantial user base using mobile platforms, such as smart
     The so-called ``Fat Finger Problem", where a user's finger occludes the very area of interest on the screen that the user is attempting to interact with, preventing fine manual interaction.\cite{fatfinger}
 
 \subsection{Motion Sensors}
-A Majority of mobile devices contain \emph{motion sensors}, which generally constitute some combination of:
+A majority of mobile devices contain \emph{motion sensors}\cite{motion}, which generally constitute some combination of:
     \begin{itemize}
     \item Gyroscopes, which can detect changes in angular orientation;
     \item Accelerometer, which can detect translational acceleration, including determination of the Gravity Vector; and
     \item Magnetometer, which can be used as a compass to detect an absolute bearing, relative to Magnetic North.
     \end{itemize}
-    Often, the information from the above sensors is passed through \emph{motion fusion} algorithms, in order to negate the individual weaknesses of any one variety of sensor, and derive between them all an absolute attitude (or orientation) of the device in real space.\par
+    Often, the information from the above sensors is passed through \emph{motion fusion}\cite{fusion} algorithms, in order to negate the individual weaknesses of any one variety of sensor, and derive between them all an absolute attitude (or orientation) of the device in real space.\par
     Access to this orientation information is provided through the HTML DOM, and can be used as a novel means of user interactivity. For example, the user could physically rotate the device in order to rotate the video and its motion trajectory path, instead of dragging the mouse.
 
 
@@ -56,20 +56,20 @@ A Majority of mobile devices contain \emph{motion sensors}, which generally cons
 \subsection{Server Data Reduction}
     Our implementation of a WWW 3D DMVN system requires a large amount of stored data on the server, as described earlier. This represents a meaningful cost to the host of such a DMVN service, and also has a significant impact on the overall network traffic between server and client. We have already explored and implemented several opportunities to reduce that burden:
 \begin {itemize}
-    \item Elision of the $z$-axis information of the path, instead relying on redundant client-side recalculation.
-    \item Paring of ``motionless" pixel path information, by first determining that a path is not very semantically ``interesting" or ``useful", and disallowing client-side selection.
+    \item Elision of the $z$-axis information (Section \ref{elision}) of the path, instead relying on redundant client-side recalculation.
+    \item Paring of motionless pixel path information (Section \ref{motionless}), by first determining that a path is not very semantically interesting or useful, and disallowing client-side selection.
 \end {itemize}
 There are a few more possibilities to reduce the storage requirements:
 
 \subsubsection{Storage Format}
-JSON was selected for its JavaScript-native deserialization support, but as a text format it is very verbose. A significant amount of space could be saved by transitioning to a binary alternative, such as \emph{BSON} (Binary JSON).
+JSON was selected for its JavaScript-native deserialization support, but as a text format it is very verbose. A significant amount of space could be saved by transitioning to a binary alternative, such as \emph{BSON} (Binary JSON).\cite{bson}
 
 \subsubsection{Path Resolution}
     Currently, we supply one path vertex per frame, or the maximum possible path resolution. This may not be practically necessary; a vertex every second or even fifth frame may suffice for an acceptable user experience.
 
 
 \subsection{Client Performance}
-Since user selection of a point along the path (path vertex with nearest temporally-weighted Euclidean distance) is a \emph{reduction} operation over the set of vertices, it is ill suited for GPU implementation. Hence, we resolved to perform the per-frame matrix-multiplication (transformation) of the path vertices on the CPU, and then send those to the GPU for display, since otherwise the transformed vertices necessary for user-mouse interaction would be redundantly calculate.\par
+Since user selection of a point along the path (path vertex with nearest temporally-weighted Euclidean distance) is a \emph{reduction}\cite{reduction} operation over the set of vertices, it is ill suited for GPU implementation. Hence, we resolved to perform the per-frame matrix-multiplication (transformation) of the path vertices on the CPU, and then send those to the GPU for display, since otherwise the transformed vertices necessary for user-mouse interaction would be redundantly calculate.\par
 In other words, since this fairly heavyweight calculation was necessary to compute on the CPU, we decided not to \emph{also} reperform the computation on the GPU; the transformed data is instead sent to the GPU. However, there is an advanced feature of OpenGL called \emph{Transform Feedback} that would allow the transformed vertices from the GPU to be made available in a buffer accessible to the CPU. The end-result would be identical in that redundant calculation is avoided, but instead of the singular calculation happening on the CPU, it would happen on the GPU instead, which should be more performant.
 
 
@@ -78,7 +78,12 @@ In other words, since this fairly heavyweight calculation was necessary to compu
 
 \subsection{Semantically Interesting Motion}
     The fundamental purpose of DMVN is to allow for a more intuitive video-navigation method: the user is enabled to drag an ``object of interest" through space to navigate to the corresponding time in the video. These ``objects of interest" may often be people, animals, or objects. However, motion beyond of these ``objects of interest" would generally serve to cloud the user experience, especially in situations that may challenge conventional computer vision techniques, or otherwise cannot be resolved to a singular, clear path of motion. For example, fluids such as smoke, rain, rustling leaves, bodies of water, or perhaps even clouds do not exhibit the type of motion that we wish to capture and express to the user as a ``motion path" for the purposes of navigation.
-\par We can categorize these kinds of unwanted motion as follows:
+\par We can (inexhaustively) categorize these kinds of unwanted motion as follows:
+\begin{itemize}
+\item Incoherent Motion; and
+\item Global Motion.
+\end{itemize}
+
 \subsubsection{Incoherent Motion}
     The motion of leaves rustling, smoke billowing, sea foam. To address this, I might:
     \begin{enumerate}

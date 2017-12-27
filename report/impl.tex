@@ -37,7 +37,7 @@ All of the above incur monetary cost to the server host, and so should all be co
 
 
 \subsection {Architecture}
-The client-facing front-end web page will provide all input/output user interactivity: it will show the 3D DMVN video and path, it will provide the means for the user to rotate the DMVN video and navigate through the motion trajectory path. It will load its requisite front-end files: HTML, CSS, JS (JavaScript), and video (H.264/MP4) are statically requested from the server by the web page, as is standard and expected by any HTML page on the World Wide Web.
+The client-facing front-end web page will provide all input/output user interactivity: it will show the 3D DMVN video and path, it will provide the means for the user to rotate the DMVN video and navigate through the motion trajectory path. It will load its requisite front-end files: HTML, CSS, JS (JavaScript), and video (H.264/MP4) are statically requested from the server by the web page, as is standard and expected by any HTML page on the World Wide Web (see Section \ref{technologies} for descriptions of these technologies).
 \par However, since path data for every pixel is too large to make a static resource of the web page, we will instead make dynamic HTTP GET requests for that data, and only send the necessary information across the Net. In order to achieve this via standard HTTP services (and not require a custom back-end server), we will make a \emph{separate path data file} for each pixel in each video.
 \par On the Web front-end, we will provide interactivity through JavaScript and use GPU acceleration through the WebGL API for the graphics processing required for 3D DMVN.
 
@@ -48,37 +48,18 @@ The client-facing front-end web page will provide all input/output user interact
 \end{figure}
 
 \section{Back-End Preparation}
-Before we can implement the 3D DMVN front-end service, we need to first generate path data files from the provided video data.
+Before we can implement the 3D DMVN front-end service, we need to first generate path data files from the provided binary optical flow data.
 
 \subsection{Optical Flow}
-Optical Flow is a means of determining the motion of pixels from one frame of video to another. The binary files associated with the provided videos are optical flow data, providing a $\Delta \vec{p} = (\Delta x, \Delta y)$ for each pixel, for each frame of video. This $\Delta \vec{p}$ expresses how the optical flow algorithm determined the pixel from the first frame to the next.\cite{opticalflow}
+\label{opticalflow}
+Optical Flow is a means of determining the motion of pixels from one frame of video to another. The binary files associated with the provided videos are optical flow data, providing a $\vec{\Delta p} = (\Delta x, \Delta y)$ for each pixel, for each frame of video. This $\vec{\Delta p}$ expresses how the optical flow algorithm determined the pixel from the first frame to the next.\cite{opticalflow}
 \par We intend on using this optical flow information to trace the path of motion from a starting pixel through each frame. We can define this algorithm recursively:
 \begin{equation}
     \vec{p}_n = \vec{p}_{n-1} + \vec{\Delta p}_n(\vec{p}_{n-1}) \\
 \end{equation}
 where the initial pixel position $\vec{p}_0$ is given, and $\vec{\Delta p}_n(\vec{p})$ is the optical flow function for frame $n$ at position $\vec{p}$.
+\par Bilinear interpolation is used when interpreting the flow vector of a subpixel coordinate by means described in Section \ref{lerp}.
 
-\subsubsection{Bilinear Interpolation for Subpixel Optical Flow Parameter}
-
-While it is always the case that our initial position is $\vec{p_0} \in \mathbb{N}$, $\vec{f_n}(\vec{p_{n-1}}) \in \mathbb{R}$. In other words, the optical flow field is only defined for pixels (with integral coordinates) and not subpixels (with real coordinates), so in order to find $\vec{f_n}(\vec{p} \in \mathbb{R})$, we must perform interpolation between several $\vec{f_n}(\vec{p} \in \mathbb{N})$.
-\par The form of interpolation we choose is Bilinear Interpolation, because it is computationally simple while providing sufficient quality of results. In order to do this at $\vec{p} \in \mathbb{R}$, we will first fetch the four surrounding defined optical flow points $\vec{g}_n$:
-\begin{align*}
-    \vec{g}_1 & = \vec{f}(\langle \lfloor p_x \rfloor, \lfloor p_y \rfloor \rangle) \\
-    \vec{g}_2 & = \vec{f}(\langle \lfloor p_x \rfloor, \lceil p_y \rceil \rangle) \\
-    \vec{g}_3 & = \vec{f}(\langle \lceil p_x \rceil, \lfloor p_y \rfloor \rangle) \\
-    \vec{g}_4 & = \vec{f}(\langle \lceil p_x \rceil, \lceil p_y \rceil \rangle)
-\end{align*}
-and then perform Linear Interpolation as follows:
-\begin{align*}
-    \vec{a} & = \text{lerp} (\vec{g}_3, \vec{g}_1, \{p_x\}) \\
-    \vec{b} & = \text{lerp} (\vec{g}_4, \vec{g}_2, \{p_x\}) \\
-    \vec{f}_{interp} & = \text{lerp} (\vec{b}, \vec{a}, \{p_y\})
-\end{align*}
-where $\{x\}$ is the fractional portion of $x$, or $\{x\} = x - \lfloor x \rfloor$, and Linear Interpolation (lerp) is defined as:
-\begin{equation}
-    \text{lerp}(\vec{a}, \vec{b}, x) = x\vec{a} + (1-x)\vec{b}
-\end{equation}
-where $0 \leq x \leq 1$.
 
 \subsection{Path Generation}
 Using a program we wrote in \texttt{python} with the \texttt{numpy} and \texttt{opencv} libraries, we generated path information for the web page to use. Ultimately, we intend to export the generated path as JSON information; in order to do so, we will convert the set of path coordinates from Video (Pixel) Space (Section \ref{videospc}) to Normalized Device Coordinates (Section \ref{ndcspace}), with the $z$ coordinate set to be on $[0,1]$, where 0 is the first frame, and 1 is the final frame.
@@ -93,20 +74,23 @@ The first program, written for development purposes, would load the first frame 
 \end{figure}
 
 \subsubsection{Batch Path Generation}
-The second program does the same as above, eschewing the visualizations and UI for performance, tracing the optical flow path for every pixel in the video (rather than a single pixel selected by a user). After some optimization by minimizing looped calculations and preloading all optical-flow files into memory, We were able to get execution time for the batch path generation down to about 12 seconds per video line for the \texttt{gym1} video, and about 15 seconds per line for the \texttt{painting1} video, which . However, it would still take more than an hour to generate the paths for every pixel in these relatively short and low-resolution videos. The final result of running this program was a directory full of JSON path files, with one file per pixel and a strict naming format: for example, \texttt{painting1-0235x0192.json}.
+\label{batchpathgen}
+The second program does the same as above, eschewing the visualizations and UI for performance, tracing the optical flow path for every pixel in the video (rather than a single pixel selected by a user). After some optimization by minimizing looped calculations and preloading all optical-flow files into memory, We were able to achieve execution time for the batch path generation down to about 12 seconds per video line for the \texttt{gym1} video, and about 15 seconds per line for the \texttt{painting1} video, which makes for approximately $100 \mu s$ per pixel per frame.
+\par Even after optimizations, batch path generation takes several hours to generate the paths for every pixel in these relatively short and low-resolution videos. The final result of running this program was a directory full of JSON path files, with one file per pixel and a strict naming format: for example, \texttt{painting1-0235x0192.json}.
 
 
 
 
 \section{World Wide Web}
 \subsection{Relevant Technologies}
+\label{technologies}
 Our solution will be formed by a combined system of several discrete technologies.
 \subsubsection{HTTP}
 \emph{HyperText Transfer Protocol} is an Application Layer (OSI) network protocol that serves as a foundation for the World Wide Web. Through it, a client (Web Browser) can request (``GET"), send (``POST"), or otherwise transceive data to or from the Web Server. HTTP is the core of our client-server system.\cite{http}
 \subsubsection{HTML}
 \emph{HyperText Markup Language} describes the content of a web page. This was the original World Wide Web technology, and it continues to form the backbone today, allowing the author to list and name which DOM elements are present, and in what hierarchy.\cite{html}
 \subsubsection{CSS}
-Through \emph{Cascading StyleSheets}, the styling of HTML elements can be managed; CSS was introduced to separate the concerns of content (HTML) and presentation (CSS), so that each could be modified independently of the other.\cite{css}
+Through \emph{Cascading StyleSheets}, the styling of HTML elements can be managed; CSS was introduced to separate the concerns of content (HTML) and presentation (CSS), so that each could be described and modified independently of the other.\cite{css}
 \subsubsection{DOM}
 \emph{DOM} (Document Object Model) is the API by which JavaScript can access and interact with the client's web page, the front-end for our application. Through the DOM, JavaScript can add event handlers; add, modify, or remove elements from the HTML tree structure; and change the styling and behavior of the webpage as a whole.\cite{dom}
 \subsubsection{JSON}
@@ -115,13 +99,15 @@ In our project, JSON is the format in which we store path data on the server; th
 \subsubsection{JavaScript}
 \emph{JavaScript}, also known by its proper name \emph{ECMAScript}, is the sole native scripting language of the World Wide Web. When adding programmatic capabilities to a website, JavaScript is the only allowed language.\cite{javascript}
 \subsubsection{WebGL}
-\emph{WebGL} is the API by which a client webpage can utilize the computer's GPU for graphics coprocessing. A standard from the Khronos Institute, it is derived from OpenGL ES 2.0, which is itself a subset of OpenGL intended for simpler mobile devices.\cite{webgl} \par
+\emph{WebGL} is the API by which a client webpage can utilize the computer's GPU for graphics coprocessing. A standard from the Khronos Institute, it is derived from OpenGL ES 2.0, which is itself a subset of OpenGL intended for mobile devices.\cite{webgl} \par
 Interestingly, despite its implementation in JavaScript WebGL's API remains nearly identical to OpenGL's relatively archaic and obtuse C API: no high-level constructs or programming methodologies (such as Object Oriented or Functional Programming) are employed.
+\subsubsection{H.264 and MPEG-4}
+The \emph{H.264} video compression\cite{h264} and its popularly associated container file format \emph{MPEG-4} (MP4) are prevalent on the internet (despite patent encumbrances) due to H.264's extremely high compression ratio. Most web browsers support H.264 videos natively. We will be using this format for our server-side (back-end) storage and client-side (front-end) decoding and playback.
 
 \subsection{User Interface}
 \label{ui}
 For our implementation, we decided on a simplistic user interface: the only visible element of the web page is the 3D DMVN video. The video automatically begins playing on startup and whenever the video is manually temporally navigated, in order to remove the necessity for an extraneous ``play" button.
-\par The user interacts with the 3D DMVN video through the mouse alone. These user-interface decisions were made in order to keep the user's focus entirely on the 3D DMVN navigation experience, although they limit the usable devices to personal computers; a user-interface for mobile devices such as smartphones or tablets requires many particular accommodations to overcome inherent complications from touch interaction and small screen sizes. Laptops with only a trackpad may not have middle mouse-button functionality; in this case, an external mouse peripheral would be necessary. We'll make the claim that the personal-computer interface is the most well-established, and thus detracts the least from the user-interface of the 3D DMVN itself.
+\par The user interacts with the 3D DMVN video through the mouse alone. These user-interface decisions were made in order to keep the user's focus entirely on the 3D DMVN navigation experience, although they limit the usable devices to personal computers; a user-interface for mobile devices such as smartphones or tablets requires many particular accommodations to overcome inherent complications from touch interaction and small screen sizes. Laptops with only a trackpad may not have middle mouse-button functionality; in this case, an external mouse peripheral would be necessary. We'll make the claim that the personal-computer interface is the most well-established and universally familiar, and thus detracts the least from the user-interface of the 3D DMVN itself.
 
 \subsubsection{Right Mouse Button}
 \label{uirmb}
@@ -145,13 +131,13 @@ In order to realize the performance necessary to display the 3D DMVN interface i
 
 \subsection{GPU APIs}
 GPUs must be controlled through an API, which acts as an interface between the CPU and the GPU's device driver. While there are several such APIs, the most widespread by far is known as \emph{OpenGL}.\cite{opengl} OpenGL was developed in the 1990s, and today remains an archaic and challenging stateful C API.
-\par \emph{WebGL} is an implementation of OpenGL meant to enable access to GPU hardware in web browsers. It is based off of the OpenGL ES 2.0 version\cite{opengles2}, which is a more recent, somewhat limited version of OpenGL for mobile devices. Ironically, even though WebGL is a JavaScript API (since JavaScript is the only language available natively in a web browser), its API is almost identical to the archaic C API. Most web developers who do not have knowledge in computer graphics might add 3D graphics to their websites by using a wrapper library around OpenGL, such as the popular \texttt{three.js}, but for the purposes of our project, we will stay as close to ``bare metal" as possible for educational purposes, and use WebGL directly.
+\par \emph{WebGL} is an implementation of OpenGL meant to enable access to GPU hardware in web browsers. It is based off of the OpenGL ES 2.0 version\cite{opengles2}, which is a more recent, somewhat limited version of OpenGL for mobile devices. Ironically, even though WebGL is a JavaScript API (since JavaScript is the only language available natively in a web browser), its API is almost identical to the archaic C API. Web developers who do not have knowledge in computer graphics might add 3D graphics to their websites by using a wrapper library around OpenGL, such as the popular \texttt{three.js}, but for the purposes of our project, we will stay as close to ``bare metal" as possible for educational purposes, and use WebGL directly.
 
 \subsection{OpenGL Architecture}
 While a full description of OpenGL architecture is not within the scope of this report, a cursory review may be warranted. When using WebGL (which is, for all intents and purposes, the same as OpenGL), we must perform substantial setup, or write ``boilerplate" code to create the graphics environment, which consists of the following objects:\cite{opengles2}
 \begin{itemize}
     \item \emph{Programs}, which are made of compiled and linked \emph{Shaders}, written in the GLSL language;
-    \item \emph{Buffers}, which are arrays of data to be considered Vertex Attributes (attributes correlated to a vertex), such as position or texture coordinates;
+    \item \emph{Buffers}, which are arrays of data to be considered Vertex Attributes (information associated with or assigned to a vertex), such as position or texture coordinates;
     \item \emph{Textures}, which are (generally) 2D image bitmaps.
 \end{itemize}
 \par When a \emph{draw} function call is made on a Buffer, then the following basic process takes place:
@@ -170,8 +156,8 @@ While a full description of OpenGL architecture is not within the scope of this 
     \item \emph{Rasterization}, where unclipped polygons will be rasterized to the viewport based off of their vertices' Positions;
     \item The \emph{Fragment Shader}, also known as a Pixel Shader, which will be run independently for each of the pixels that were rasterized for the polygon. It takes as inputs the following:
     \begin{itemize}
-        \item Varyings, which are bilinearly interpolated from the values set by the vertices based off of the spatial position of the fragment (pixel) relative to those vertices;
-        \item Uniforms, which again are global information shared among all fragments.
+        \item \emph{Varyings}, which are bilinearly interpolated from the values set by the vertices based off of the spatial position of the fragment (pixel) relative to those vertices;
+        \item \emph{Uniforms}, which again are global information shared among all fragments.
     \end{itemize}
     and as outputs the following:
     \begin{itemize}
@@ -246,6 +232,7 @@ While the Fragment Shader always reports of the color of the line to be yellow, 
 The na{\"i}ve implementation of our method results in a surprisingly large amount of data (Section \ref{conclusionresults}). We explored some methods of reducing that storage requirement.
 
 \subsection{Motionless Pixels}
+\label{motionless}
     Many pixels do not move significantly throughout a scene. Not only does this cause substantial waste in storing useless data, but it can also be confusing to a user when they click on a pixel and get a simple, straight line. If a path is nearly motionless, it could be either:
     \begin{enumerate}
         \item Noted in that pixel's respective file as a ``motionless pixel", rather than explicitly list every frame's vertex. This would produce effectively the same behavior as presently.
@@ -256,5 +243,6 @@ The na{\"i}ve implementation of our method results in a surprisingly large amoun
     \par The means by which our selected solution is implemented are described in Section \ref{paring}.
 
 \subsection{Elision of $z$ Coordinate}
+\label{elision}
     The inclusion of the $z$ coordinate for each vertex is not truly necessary, as that information could be reconstructed on the client side by dividing each array element's index by the element count, minus one. This would add a small amount of performance overhead to the client process, but since it only occurs once each time a path is loaded, its overall impact should be minimal for the amount of space saved on the server (nearly $\frac{1}{3}$).
 

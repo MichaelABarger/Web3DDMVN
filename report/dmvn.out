@@ -44,29 +44,31 @@
 \BOOKMARK [2][-]{subsection.4.3.2}{Rotation Matrices}{section.4.3}% 44
 \BOOKMARK [2][-]{subsection.4.3.3}{Projection Matrices}{section.4.3}% 45
 \BOOKMARK [2][-]{subsection.4.3.4}{3D DMVN Matrices}{section.4.3}% 46
-\BOOKMARK [1][-]{section.4.4}{DMVN Interactivity}{chapter.4}% 47
-\BOOKMARK [2][-]{subsection.4.4.1}{Rotating the Scene}{section.4.4}% 48
-\BOOKMARK [2][-]{subsection.4.4.2}{Temporal Navigation}{section.4.4}% 49
-\BOOKMARK [2][-]{subsection.4.4.3}{Path Pixel Selection}{section.4.4}% 50
-\BOOKMARK [1][-]{section.4.5}{Paring of ``Unmoving" Paths}{chapter.4}% 51
-\BOOKMARK [0][-]{chapter.5}{Conclusions}{}% 52
-\BOOKMARK [1][-]{section.5.1}{Observations}{chapter.5}% 53
-\BOOKMARK [1][-]{section.5.2}{Dynamic Service Request-Time Test}{chapter.5}% 54
-\BOOKMARK [1][-]{section.5.3}{Results}{chapter.5}% 55
-\BOOKMARK [0][-]{chapter.6}{Future Work}{}% 56
-\BOOKMARK [1][-]{section.6.1}{Dynamic Web Server Implementation}{chapter.6}% 57
-\BOOKMARK [1][-]{section.6.2}{Alternative Data Storage Methods}{chapter.6}% 58
-\BOOKMARK [2][-]{subsection.6.2.1}{Utilization of Video Compression}{section.6.2}% 59
-\BOOKMARK [2][-]{subsection.6.2.2}{Blob Flow}{section.6.2}% 60
-\BOOKMARK [1][-]{section.6.3}{Mobile Device Support}{chapter.6}% 61
-\BOOKMARK [2][-]{subsection.6.3.1}{Fat Finger Problem}{section.6.3}% 62
-\BOOKMARK [2][-]{subsection.6.3.2}{Motion Sensors}{section.6.3}% 63
-\BOOKMARK [1][-]{section.6.4}{Optimization}{chapter.6}% 64
-\BOOKMARK [2][-]{subsection.6.4.1}{Server Data Reduction}{section.6.4}% 65
-\BOOKMARK [2][-]{subsection.6.4.2}{Client Performance}{section.6.4}% 66
-\BOOKMARK [1][-]{section.6.5}{Semantics \046 Intuitiveness}{chapter.6}% 67
-\BOOKMARK [2][-]{subsection.6.5.1}{Semantically Interesting Motion}{section.6.5}% 68
-\BOOKMARK [2][-]{subsection.6.5.2}{Immobile Regions}{section.6.5}% 69
-\BOOKMARK [2][-]{subsection.6.5.3}{Camera Motion}{section.6.5}% 70
-\BOOKMARK [2][-]{subsection.6.5.4}{Semantic Segmentation}{section.6.5}% 71
-\BOOKMARK [2][-]{subsection.6.5.5}{Scene-Change Detection}{section.6.5}% 72
+\BOOKMARK [1][-]{section.4.4}{Optical Flow}{chapter.4}% 47
+\BOOKMARK [2][-]{subsection.4.4.1}{Bilinear Interpolation}{section.4.4}% 48
+\BOOKMARK [1][-]{section.4.5}{DMVN Interactivity}{chapter.4}% 49
+\BOOKMARK [2][-]{subsection.4.5.1}{Rotating the Scene}{section.4.5}% 50
+\BOOKMARK [2][-]{subsection.4.5.2}{Temporal Navigation}{section.4.5}% 51
+\BOOKMARK [2][-]{subsection.4.5.3}{Path Pixel Selection}{section.4.5}% 52
+\BOOKMARK [1][-]{section.4.6}{Paring of Motionless Paths}{chapter.4}% 53
+\BOOKMARK [0][-]{chapter.5}{Conclusions}{}% 54
+\BOOKMARK [1][-]{section.5.1}{Observations}{chapter.5}% 55
+\BOOKMARK [1][-]{section.5.2}{Dynamic Service Request-Time Test}{chapter.5}% 56
+\BOOKMARK [1][-]{section.5.3}{Results}{chapter.5}% 57
+\BOOKMARK [0][-]{chapter.6}{Future Work}{}% 58
+\BOOKMARK [1][-]{section.6.1}{Dynamic Web Server Implementation}{chapter.6}% 59
+\BOOKMARK [1][-]{section.6.2}{Alternative Data Storage Methods}{chapter.6}% 60
+\BOOKMARK [2][-]{subsection.6.2.1}{Utilization of Video Compression}{section.6.2}% 61
+\BOOKMARK [2][-]{subsection.6.2.2}{Blob Flow}{section.6.2}% 62
+\BOOKMARK [1][-]{section.6.3}{Mobile Device Support}{chapter.6}% 63
+\BOOKMARK [2][-]{subsection.6.3.1}{Fat Finger Problem}{section.6.3}% 64
+\BOOKMARK [2][-]{subsection.6.3.2}{Motion Sensors}{section.6.3}% 65
+\BOOKMARK [1][-]{section.6.4}{Optimization}{chapter.6}% 66
+\BOOKMARK [2][-]{subsection.6.4.1}{Server Data Reduction}{section.6.4}% 67
+\BOOKMARK [2][-]{subsection.6.4.2}{Client Performance}{section.6.4}% 68
+\BOOKMARK [1][-]{section.6.5}{Semantics \046 Intuitiveness}{chapter.6}% 69
+\BOOKMARK [2][-]{subsection.6.5.1}{Semantically Interesting Motion}{section.6.5}% 70
+\BOOKMARK [2][-]{subsection.6.5.2}{Immobile Regions}{section.6.5}% 71
+\BOOKMARK [2][-]{subsection.6.5.3}{Camera Motion}{section.6.5}% 72
+\BOOKMARK [2][-]{subsection.6.5.4}{Semantic Segmentation}{section.6.5}% 73
+\BOOKMARK [2][-]{subsection.6.5.5}{Scene-Change Detection}{section.6.5}% 74

@@ -50,15 +50,16 @@ This project is \emph{not} meant to create a production-ready, polished product,
 \end{itemize}
 
 \section{Materials}
-The author of the 3D DMVN paper graciously provided materials from his research for my implementation. These included:
+An author of the 3D DMVN paper graciously provided materials from his research for my implementation. These included:
 \begin{itemize}
     \item Two example videos in AVI container format, well-suited to illustrate 3D DMVN:
     \begin{itemize}
-    \item \textbf{\emph{Gym}}: a scene where a man uses a weight machine. The scene is largely immobile, except for the man's arms and the weight pulley system. Both of these objects under motion repeat their paths in a self-occluding fashion (when viewed in 2D DMVN), and thus provides an example of the utility of 3D DMVN.
-    \item \textbf{\emph{Painting}}: a close-up scene where an artist paints with a paintbrush. This scene offers some challenges due to the complicated path of the brush, and the close-up field of view causes parts of the painter's hand and brush to leave the video for periods of time.
+    \item \textbf{\emph{Gym}}: a scene where a man uses a weight machine. The scene is largely immobile, except for the man's arms and the weight pulley system. Both of these objects under motion repeat their paths in a self-occluding fashion (when viewed in 2D DMVN), and thus provides an example of the utility of 3D DMVN. The video has a total of 180 frames.
+    \item \textbf{\emph{Painting}}: a close-up scene where an artist paints with a paintbrush. This scene offers some challenges due to the complicated path of the brush, and the close-up field of view causes parts of the painter's hand and brush to leave the video for periods of time. This video has a total of 284 frames.
     \end{itemize}
-    \item Uncompressed binary data files relating to the above two videos.
+    \item Uncompressed optical flow binary data files relating to the above two videos.
 \end{itemize}
+Both included videos are 640$\times$360 in resolution.
 
 \section{Tools}
 I wanted to use the most basic toolset possible, eschewing third-party libraries (as much as practical) in order to keep the majority of the implementation manual, for educational purposes.
@@ -76,7 +77,7 @@ I wanted to use the most basic toolset possible, eschewing third-party libraries
     \item the matrix and vector function library \verb!mat.js! was written manually by myself for educational purposes;
     \item it should be noted that I purposefully avoided higher-level 3D libraries, such as \verb!three.js!, since I felt that it would take away from the effort of the project and might compromise the results;
     \end{itemize}
-\item Google \textbf{Chrome} browser for viewing and debugging of the web front-end; and
+\item Google \textbf{Chrome} and Mozilla \textbf {Firefox} browsers for viewing and debugging of the web front-end; and
 \item \textbf{\LaTeX} for formatting of this report, since I had never used it before and figured now would be as good a time as any to learn.
 \end{itemize}
 

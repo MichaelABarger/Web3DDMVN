@@ -3,7 +3,7 @@
 
 
 \section{Coordinate Systems}
-As in most graphics applications, throughout our implementation we work with many different coordinate systems, and must convert between them.
+As in most graphics applications, throughout our implementation we work with many different coordinate systems\cite{coordinatesystem}, and must convert between them.
 
 \subsection{Video (Pixel) Space}
 \label{videospc}
@@ -30,7 +30,8 @@ When operating on the video frames in Python using \texttt{opencv} and \texttt{n
 \par Figure \ref{videospace} shows how the coordinate space is defined, where $w$ is the video width in pixels, and $h$ is its height.
 
 \subsection{Normalized Texture Coordinates}
-OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from textures, through \emph{Normalized Texture Coordinates}. Unlike many other image/texture addressing systems, this system uses real numbers instead of natural numbers, as the GPU Texture Unit hardware will perform bilinear interpolation to enable subpixel fetching.
+\label{ntcspace}
+OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from textures, through \emph{Normalized Texture Coordinates}.\cite{opengles2} Unlike many other image/texture addressing systems, this system uses real numbers instead of natural numbers, as the GPU Texture Unit hardware will perform bilinear interpolation\cite{linearinterp} to enable subpixel fetching.
 \begin{figure}[h]
 \centering
 \begin{picture}(100, 100)
@@ -50,7 +51,7 @@ OpenGL's shader language GLSL addresses \emph{texels}, or pixels fetched from te
 \end{figure}
 \subsection{Normalized Device Coordinates}
 \label{ndcspace}
-Normalized Device Coordinates (NDC) are the only 3D coordinate system used in our project. It is used by OpenGL: the Vertex Shader stage must present a vertex position to the rendering engine in this coordinate space. A left-handed $\mathbb{R}^3$ space where $x$, $y$, and $z$ are all on $[-1, 1]$, any draw primitive (usually a triangle) where all vertices are outside of that domain will be clipped (not rendered).
+Normalized Device Coordinates\cite{opengles2} (NDC) are the only 3D coordinate system used in our project. It is used by OpenGL: the Vertex Shader stage must present a vertex position to the rendering engine in this coordinate space. A left-handed $\mathbb{R}^3$ space where $x$, $y$, and $z$ are all on $[-1, 1]$, any draw primitive (usually a triangle) where all vertices are outside of that domain will be clipped (not rendered).
 \begin{figure}[h]
 \centering
 \begin{picture}(100, 100)
@@ -82,7 +83,7 @@ Normalized Device Coordinates (NDC) are the only 3D coordinate system used in ou
     \item If all vertices $\vec{v}$ in a polygon are marked for clipping, then the polygon is not drawn (is clipped)
 \end{enumerate}
 \subsection{DOM Space}
-In the context of HTML pages, positions (particularly: mouse positions and such) are measured in ``DOM Space", an integral pixel space with origin in the upper-left corner \emph{of the containing DOM element}. For example, if handling an event of a \texttt{canvas} element, then the DOM Space's origin will be in the upper-left corner of that \texttt{canvas} element, and its domain also bound by that element's pixel width and height.
+In the context of HTML pages, positions (particularly: mouse positions and such) are measured in ``DOM Space"\cite{domcoords}, an integral pixel space with origin in the upper-left corner \emph{of the containing DOM element}. For example, if handling an event of a \texttt{canvas} element, then the DOM Space's origin will be in the upper-left corner of that \texttt{canvas} element, and its domain also bound by that element's pixel width and height.
 \par As DOM Space's origin is measured as $(0,0)$, its domain is $x \in [0,w) \subset \mathbb(N)$ and $y \in [0,h] \subset \mathbb{N}$, where $w$ is the width and $h$ is the height of the containing object in pixels.
 \begin{figure}[h]
 \centering
@@ -105,7 +106,7 @@ In the context of HTML pages, positions (particularly: mouse positions and such)
 
 
 \section{Coordinate Transforms}
-We can use simple linear operations to convert between these coordinate spaces. To demonstrated, we will show the conversions to or from Normalized Texture Coordinates. In some cases, both Video and DOM Space will be referred to as Pixel Space, whenever the order of the coordinates is not relevant. ($w$ is the width and $h$ is the height of the image in pixel space.)
+We can use simple linear operations to convert between these coordinate spaces.\cite{changeofbasis} To demonstrated, we will show the conversions to or from Normalized Texture Coordinates. In some cases, both Video and DOM Space will be referred to as Pixel Space, whenever the order of the coordinates is not relevant. ($w$ is the width and $h$ is the height of the image or DOM element in pixel space.)
 
 \subsubsection{Pixel Space $\vec{p}$ to Normalized Texture Coordinates $\vec{t}$}
 \begin{equation}
@@ -134,6 +135,7 @@ We can use simple linear operations to convert between these coordinate spaces. 
 
 
 \section{Spatial Transforms}
+Within our 3D Normalized Device Coordinates (see Section \ref{ndcspace}), we must convert our base set of input vertices (full-screen quad for the video planar section) to account for video aspect ratio, user-controlled yaw/pitch rotations, and window apsect ratio. This can be achieved using composed transformation matrices.\cite{xformmat}
 
 \subsection{Scaling Matrices}
 Where $\vec{s}$ is a vector of dimensional factors by which we wish to scale:
@@ -147,6 +149,7 @@ S(\vec{s}) =
 \end{equation}
 
 \subsection{Rotation Matrices}
+\label{rotmat}
 
 \subsubsection{Rotation About the $x$ Axis}
 By the angle $\phi$:
@@ -201,6 +204,37 @@ For the drawing of the Video Box itself, we apply the transform matrix $T$ to ea
     \vec{v}'' & = T \vec{v}'
 \end{align}
 
+\section{Optical Flow}
+Optical flow is described in Section \ref{opticalflow}, and is defined in Equation \ref{lerpeq}:
+\begin{equation}
+\label{lerpeq}
+    \vec{p}_n = \vec{p}_{n-1} + \vec{\Delta p}_n(\vec{p}_{n-1}) \\
+\end{equation}
+
+\subsection{Bilinear Interpolation}
+\label{lerp}
+
+While it is always the case that our initial position is $\vec{p_0} \in \mathbb{N}$, $\vec{f_n}(\vec{p_{n-1}}) \in \mathbb{R}$. In other words, the optical flow field is only defined for pixels (with integral coordinates) and not subpixels (with real coordinates), so in order to find $\vec{f_n}(\vec{p} \in \mathbb{R})$, we must perform interpolation between several $\vec{f_n}(\vec{p} \in \mathbb{N})$.
+\par The form of interpolation we choose is Bilinear Interpolation, because it is computationally simple while providing sufficient quality of results. In order to do this at $\vec{p} \in \mathbb{R}$, we will first fetch the four surrounding defined optical flow points $\vec{g}_n$:\cite{linearinterp}
+\begin{align*}
+    \vec{g}_1 & = \vec{f}(\langle \lfloor p_x \rfloor, \lfloor p_y \rfloor \rangle) \\
+    \vec{g}_2 & = \vec{f}(\langle \lfloor p_x \rfloor, \lceil p_y \rceil \rangle) \\
+    \vec{g}_3 & = \vec{f}(\langle \lceil p_x \rceil, \lfloor p_y \rfloor \rangle) \\
+    \vec{g}_4 & = \vec{f}(\langle \lceil p_x \rceil, \lceil p_y \rceil \rangle)
+\end{align*}
+and then perform Linear Interpolation as follows:
+\begin{align*}
+    \vec{a} & = \text{lerp} (\vec{g}_3, \vec{g}_1, \{p_x\}) \\
+    \vec{b} & = \text{lerp} (\vec{g}_4, \vec{g}_2, \{p_x\}) \\
+    \vec{f}_{interp} & = \text{lerp} (\vec{b}, \vec{a}, \{p_y\})
+\end{align*}
+where $\{x\}$ is the fractional portion of $x$, or $\{x\} = x - \lfloor x \rfloor$, and Linear Interpolation (lerp) is defined as:
+\begin{equation}
+    \text{lerp}(\vec{a}, \vec{b}, x) = x\vec{a} + (1-x)\vec{b}
+\end{equation}
+where $0 \leq x \leq 1$.
+
+
 \section{DMVN Interactivity}
 The user interacts (Section \ref{ui}) with the Web 3D DMVN demonstration in three different ways:
 \begin{enumerate}
@@ -210,11 +244,11 @@ The user interacts (Section \ref{ui}) with the Web 3D DMVN demonstration in thre
 \end{enumerate}
 
 \subsection{Rotating the Scene}
-Whenever the user \emph{right-click drags} their mouse (Section \ref{uirmb}), we translate the mouse movement in $(x,y)$ DOM Space to Euler angles (yaw and pitch, $\phi$ and $\theta$), ensuring that neither $\phi$ nor $\theta$ never exceed $\pm45\deg$. $\phi$ and $\theta$ are used in the generation of the 3D $x$ and $y$ rotation matrices for our 3D DMVN Matrix.
+Whenever the user \emph{right-click drags} their mouse (Section \ref{uirmb}), we translate the mouse movement in $(x,y)$ DOM Space to Euler angles (yaw and pitch, $\phi$ and $\theta$), ensuring that neither $\phi$ nor $\theta$ never exceed $\pm45\deg$. $\phi$ and $\theta$ are used in the generation of the 3D $x$ and $y$ rotation matrices for our 3D DMVN Matrix (Section \ref{rotmat}).
 
 \subsection{Temporal Navigation}
 \label{temporalnav}
-Clicking the left mouse button (Section \ref{uilmb}) triggers temporal navigation. While holding the button down and dragging, we iterate over the entire set of path points $\vec{p}$ and choose a ``nearest" one to the normalized mouse location $\vec{m}$ as follows:
+Clicking the left mouse button (Section \ref{uilmb}) triggers temporal navigation. While holding the button down and dragging, we iterate over the entire set of path points $\vec{p}$ and choose a ``nearest" one to the normalized mouse location $\vec{m}$ as follows:\cite{dmvn3d}
 \begin{equation}
 \label{tempcoh}
     t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2 + \kappa (p_t - m_t)^2}
@@ -226,10 +260,6 @@ This is a straightforward Euclidean distance between our ``point of selection" $
     t'= \arg \min_{p_t} \sqrt{(p_x-m_x)^2 + (p_y-m_y)^2}
 \end{equation}
 as when a user initially clicks to begin navigation, they are rarely considering temporal coherence. However, while dragging we use Equation \ref{tempcoh}.
-\par We did optimize the performance of the code by removing the square-root operation, since it isn't ultimately relevant to the result, as
-\begin{equation}
-    \arg \min \sqrt x_i = \arg \min x_i
-\end{equation}
 
 
 
@@ -237,8 +267,8 @@ as when a user initially clicks to begin navigation, they are rarely considering
 \label{raytracing}
 When selecting a new pixel from which to generate a motion trajectory path for navigation (Section \ref{uimmb}), we must perform \emph{ray tracing} to determine which pixel was selected by the user in order to take into account the current orientation of that video in $\mathbb{R}^3$ space and despite all of those above transforms. In order to do this, we must cast a ray where the user middle-clicks with their mouse, down into that $\mathbb{R}^3$ space, and determine its point of intersection with the planar surface of the video in a way in which we can then determine the pixel coordinates of such intersection.\par
 \subsubsection{Designing a Parametric Intersection Equation}
-    We decided to solve this problem by expressing it as a system of parametric vector equations. Since our video surface, prior to transformations, exists as a "full-screen quad" in the XY plane from $[-1,1]$, we start with three points on that quad: the upper-left corner $\vec{a}=\langle-1,1,0\rangle$, the upper-right corner $\vec{b}=\langle1,1,0\rangle$, and the lower-left corner $\vec{c}=\langle1,-1,0\rangle$. Then, we apply our global scaling/rotation transformation matrix, $M$ to those three points; for example, $\vec{a}'=M\vec{a}$.\par
-    The parametric form of a plane can be expressed as $\vec{p_0}+\vec{u}s+\vec{v}t$, where $\vec{p_0}$ is any reference point on that plane, and $\vec{u}$ and $\vec{v}$ are any rays along its surface. In order to utilize this parametric form to solve my problem, I will let $\vec{u}$ define the horizontal axis of my video frame on $[0,1]$, and $\vec{v}$ represent the vertical axis of my video frame, also on $[0,1]$, similar to the \emph{Normalized Texture Coordinates} described above. By doing this, we can easily convert these normalized coordinates to pixel coordinates, and we can also easily test for rays that do not intersect the transformed video plane by checking if the point of intersection lies outside of $[0,1]$ regardless of the pixel dimensions of the video.\par
+    We decided to solve this problem by expressing it as a system of parametric vector equations.\cite{parametriceq} Since our video surface, prior to transformations, exists as a ``full-screen quad" in the XY plane from $[-1,1]$, we start with three points on that quad: the upper-left corner $\vec{a}=\langle-1,1,0\rangle$, the upper-right corner $\vec{b}=\langle1,1,0\rangle$, and the lower-left corner $\vec{c}=\langle1,-1,0\rangle$. Then, we apply our global scaling/rotation transformation matrix, $M$ to those three points; for example, $\vec{a}'=M\vec{a}$.\par
+    The parametric form of a plane can be expressed as $\vec{p_0}+\vec{u}s+\vec{v}t$, where $\vec{p_0}$ is any reference point on that plane, and $\vec{u}$ and $\vec{v}$ are any rays along its surface. In order to utilize this parametric form to solve my problem, I will let $\vec{u}$ define the horizontal axis of my video frame on $[0,1]$, and $\vec{v}$ represent the vertical axis of my video frame, also on $[0,1]$, similar to the \emph{Normalized Texture Coordinates} described in Section \ref{ntcspace}. By doing this, we can easily convert these normalized coordinates to pixel coordinates, and we can also easily test for rays that do not intersect the transformed video plane by checking if the point of intersection lies outside of $[0,1]$ regardless of the pixel dimensions of the video.\par
     Since $\vec{a}'$ is the origin of our desired coordinate space, we will use it as $\vec{p_0}$. As $\vec{b}'$ is also the point where the horizontal axis of the video is maximally in bounds, we can define $\vec{u}=\vec{b}'-\vec{a}'$; similarly, for the vertical axis we can define $\vec{v}=\vec{c}'-\vec{a}'$. It follows, then, that we can express any point $\vec{z}$ on our plane as
     \begin{equation}
     \vec{z}=\vec{a}'+\vec{u}s+\vec{v}t
@@ -254,7 +284,7 @@ where $s$ and $t$ are the parametric variables.\par
     \end{equation}
 
 \subsubsection{Solving the Intersection Equation}
-While our parametric equation above is in vector notation, it could equivalently described as a system of equations as follows:
+While our parametric equation above is in vector notation, it could equivalently described as a system of equations\cite{systems} as follows:
     \begin{equation}
     \begin{cases}
         a_x'+u_x s + v_x t & =  m_x \\
@@ -311,15 +341,14 @@ This simultaneous equation can then be expressed as a matrix equation by separat
 
 \end{enumerate}
 
-\section{Paring of ``Unmoving" Paths}
+\section{Paring of Motionless Paths}
 \label{paring}
 While paths are being generated for all pixels of a video, we will notice that most pixels' paths do not go anywhere, nor do they suggest the substantial movement of an object within the scene. Through experimentation, we found the following metric most useful:
 
 \begin{align}
     \vec{\Delta P_n}  &= \vec{P_{n+1}} - \vec{P_n} \\
     \delta  &= \sum (\vec{\Delta P_n} \cdotp \vec{\Delta P_n}) \\
-    \psi  &\impliedby (\delta < \frac{f}{\chi}) \\
-    \chi  &\approx 36000
+    \psi  &\impliedby (\delta < \frac{f}{\chi}), \chi \approx 36000
 \end{align}
 
 where

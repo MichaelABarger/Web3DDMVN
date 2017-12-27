@@ -4,31 +4,35 @@
 Web-based 3D DMVN's mechanism for loading motion-trajectory paths can be implemented with either a \emph{static HTTP server} or a \emph{dynamic HTTP server}.
 
 \subsection{Static HTTP Server}
-Static HTTP servers simply ``serve" files to a client on request.\cite{staticweb} They are commonplace and standard, enabling straightforward and widespread adoption of 3D DMVN. Two ways that this could be implemented is with ``trajectories as files", or a file per trajectory, and the other is as a compressed video file.
+Static HTTP servers simply ``serve" files to a client on request.\cite{staticweb} They are commonplace and standard, enabling straightforward and widespread adoption of 3D DMVN. Two ways that this could be implemented:
+\begin{enumerate}
+\item with ``trajectories as files", or a file per trajectory; or
+\item as a compressed video file.
+\end{enumerate}
 
 \subsubsection{Trajectories as Files}
 For every pixel in the video, a motion trajectory data path for that pixel is stored in a data file (JSON format); this file can then be served to any web client on demand.
 \par The downsides of this approach would be:
 \begin{itemize}
     \item Storage requirements: the data stored on the server will likely be substantially large; and
-    \item Path selection will only be available from the first frame.
+    \item Path selection will only be available from the first frame, as otherwise the data requirements would be multiplied by the total frame count of the video.
 \end{itemize}
 \par This is the method that we will implement in this project.
 \subsubsection{Compressed Video File}
-Motion trajectory information could be encoded into an H.264 (or similar) video file. This would offer a substantial reduction in storage requirements, allowing all motion trajectory paths to be statically sent to the client with (only) approximately twice the bandwidth requirement of the original video alone. For example, the optical flow vector for each pixel's $x$ component, $y$ component, and magnitude (redundant, but useful) could be stored in the R, G, and B channels of the video.
+Motion trajectory information could be encoded into a statically-served H.264 (or similar) video file. This would offer a substantial reduction in storage requirements, allowing all motion trajectory paths to be statically sent to the client with (only) approximately twice the bandwidth requirement of the original video alone. For example, the optical flow vector for each pixel's $x$ component, $y$ component, and magnitude (redundant, but useful) could be stored in the R, G, and B channels of the video.
 \par However, there are downsides to this approach as well:\cite{h264}
 \begin{itemize}
-    \item Most encoded images and videos use the Y'CbCr color space and spatial subsampling of the chrominance planes (Cb and Cr), which causes spatial lossiness of information;
-    \item All common compressed video formats perform quantization on frequency-domain information, and usually moreso on the chrominance planes, which will reduce the accuracy of the stored information;
+    \item Most encoded images and videos use the Y'CbCr color space\cite{ycbcr} and spatial subsampling of the chrominance planes (Cb and Cr), which causes spatial lossiness of information;
+    \item All common compressed video formats perform quantization on frequency-domain information (and usually moreso on the chrominance planes) which will reduce the accuracy (and consistency of that accuracy) of the stored information;
     \item It is unlikely that the nature of the ``color" data stored in the video will be conducive to H.264's motion estimation algorithms, so the video file size may be much larger than normal, or the quality much more degraded; and
     \item Navigating through this ``data" video to extract the trajectories on the client side will be clumsy, and may incur significant decoding and computation delays.
 \end{itemize}
 
 \subsection{Dynamic HTTP Server}
-A custom HTTP server could also be developed to perform the optical-flow computation in immediate response to clients' HTTP requests.\cite{dynamicweb} This approach would have the following detriments:
+A \emph{custom} HTTP server could also be developed to perform the optical-flow computation in immediate response to clients' HTTP requests.\cite{dynamicweb} This approach would have the following detriments:
 \begin{itemize}
-    \item A custom HTTP server must be developed and hosted, which is much more expensive and difficult than a standard static HTTP server;
-    \item Request service time may be unacceptable, due to the need to calculate optical flow motion trajectories immediately upon client request; and
+    \item A \emph{custom} HTTP server must be developed and hosted, which is much more difficult and expensive than a standard static HTTP server;
+    \item Request service time may be unacceptably long, due to the need to calculate optical flow motion trajectories immediately upon client request; and
     \item Storage space requirements could be high if binary intermediate data (such as optical flow map) storage is required.
 \end{itemize}
 

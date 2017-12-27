@@ -14,110 +14,112 @@
 \contentsline {section}{\numberline {2.1}Background}{8}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}Static HTTP Server}{8}{subsection.2.1.1}
 \contentsline {subsubsection}{Trajectories as Files}{8}{section*.5}
-\contentsline {subsubsection}{Compressed Video File}{8}{section*.6}
+\contentsline {subsubsection}{Compressed Video File}{9}{section*.6}
 \contentsline {subsection}{\numberline {2.1.2}Dynamic HTTP Server}{9}{subsection.2.1.2}
-\contentsline {section}{\numberline {2.2}Proposition}{9}{section.2.2}
-\contentsline {chapter}{\numberline {3}Implementation}{10}{chapter.3}
-\contentsline {section}{\numberline {3.1}Systems Architecture}{10}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}Considerations}{10}{subsection.3.1.1}
-\contentsline {subsubsection}{Network Bandwidth}{10}{section*.7}
-\contentsline {subsubsection}{Network Latency}{10}{section*.8}
-\contentsline {subsubsection}{Client Performance}{11}{section*.9}
-\contentsline {subsubsection}{Server (Back-End) Burden}{11}{section*.10}
-\contentsline {subsection}{\numberline {3.1.2}Architecture}{11}{subsection.3.1.2}
-\contentsline {section}{\numberline {3.2}Back-End Preparation}{12}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}Optical Flow}{12}{subsection.3.2.1}
-\contentsline {subsubsection}{Bilinear Interpolation for Subpixel Optical Flow Parameter}{13}{section*.11}
-\contentsline {subsection}{\numberline {3.2.2}Path Generation}{13}{subsection.3.2.2}
-\contentsline {subsubsection}{Interactive Path Generation}{13}{section*.12}
-\contentsline {subsubsection}{Batch Path Generation}{14}{section*.13}
-\contentsline {section}{\numberline {3.3}World Wide Web}{14}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}Relevant Technologies}{14}{subsection.3.3.1}
-\contentsline {subsubsection}{HTTP}{15}{section*.14}
-\contentsline {subsubsection}{HTML}{15}{section*.15}
-\contentsline {subsubsection}{CSS}{15}{section*.16}
-\contentsline {subsubsection}{DOM}{15}{section*.17}
-\contentsline {subsubsection}{JSON}{15}{section*.18}
-\contentsline {subsubsection}{JavaScript}{15}{section*.19}
-\contentsline {subsubsection}{WebGL}{16}{section*.20}
+\contentsline {section}{\numberline {2.2}Proposition}{10}{section.2.2}
+\contentsline {chapter}{\numberline {3}Implementation}{11}{chapter.3}
+\contentsline {section}{\numberline {3.1}Systems Architecture}{11}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Considerations}{11}{subsection.3.1.1}
+\contentsline {subsubsection}{Network Bandwidth}{11}{section*.7}
+\contentsline {subsubsection}{Network Latency}{11}{section*.8}
+\contentsline {subsubsection}{Client Performance}{12}{section*.9}
+\contentsline {subsubsection}{Server (Back-End) Burden}{12}{section*.10}
+\contentsline {subsection}{\numberline {3.1.2}Architecture}{12}{subsection.3.1.2}
+\contentsline {section}{\numberline {3.2}Back-End Preparation}{13}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Optical Flow}{13}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Path Generation}{14}{subsection.3.2.2}
+\contentsline {subsubsection}{Interactive Path Generation}{14}{section*.11}
+\contentsline {subsubsection}{Batch Path Generation}{14}{section*.12}
+\contentsline {section}{\numberline {3.3}World Wide Web}{15}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Relevant Technologies}{15}{subsection.3.3.1}
+\contentsline {subsubsection}{HTTP}{15}{section*.13}
+\contentsline {subsubsection}{HTML}{15}{section*.14}
+\contentsline {subsubsection}{CSS}{15}{section*.15}
+\contentsline {subsubsection}{DOM}{15}{section*.16}
+\contentsline {subsubsection}{JSON}{16}{section*.17}
+\contentsline {subsubsection}{JavaScript}{16}{section*.18}
+\contentsline {subsubsection}{WebGL}{16}{section*.19}
+\contentsline {subsubsection}{H.264 and MPEG-4}{16}{section*.20}
 \contentsline {subsection}{\numberline {3.3.2}User Interface}{16}{subsection.3.3.2}
-\contentsline {subsubsection}{Right Mouse Button}{16}{section*.21}
-\contentsline {subsubsection}{Left Mouse Button}{16}{section*.22}
+\contentsline {subsubsection}{Right Mouse Button}{17}{section*.21}
+\contentsline {subsubsection}{Left Mouse Button}{17}{section*.22}
 \contentsline {subsubsection}{Middle Mouse Button}{17}{section*.23}
-\contentsline {section}{\numberline {3.4}Hardware-Accelerated Graphics}{17}{section.3.4}
-\contentsline {subsection}{\numberline {3.4.1}GPU APIs}{17}{subsection.3.4.1}
-\contentsline {subsection}{\numberline {3.4.2}OpenGL Architecture}{17}{subsection.3.4.2}
+\contentsline {section}{\numberline {3.4}Hardware-Accelerated Graphics}{18}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}GPU APIs}{18}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}OpenGL Architecture}{18}{subsection.3.4.2}
 \contentsline {section}{\numberline {3.5}3D DMVN WebGL Shader Programs}{19}{section.3.5}
 \contentsline {subsection}{\numberline {3.5.1}Video Planar-Section Shader}{19}{subsection.3.5.1}
-\contentsline {subsubsection}{Buffers \& Attributes}{19}{section*.24}
-\contentsline {subsubsection}{Textures}{19}{section*.25}
-\contentsline {subsubsection}{Uniforms}{19}{section*.26}
-\contentsline {subsubsection}{Vertex Shader}{19}{section*.27}
+\contentsline {subsubsection}{Buffers \& Attributes}{20}{section*.24}
+\contentsline {subsubsection}{Textures}{20}{section*.25}
+\contentsline {subsubsection}{Uniforms}{20}{section*.26}
+\contentsline {subsubsection}{Vertex Shader}{20}{section*.27}
 \contentsline {subsubsection}{Fragment Shader}{20}{section*.28}
 \contentsline {subsection}{\numberline {3.5.2}Wire-Frame Box-Volume Shader}{20}{subsection.3.5.2}
-\contentsline {subsubsection}{Buffers \& Attributes}{20}{section*.29}
-\contentsline {subsubsection}{Uniforms}{20}{section*.30}
-\contentsline {subsubsection}{Vertex Shader}{20}{section*.31}
-\contentsline {subsubsection}{Fragment Shader}{20}{section*.32}
+\contentsline {subsubsection}{Buffers \& Attributes}{21}{section*.29}
+\contentsline {subsubsection}{Uniforms}{21}{section*.30}
+\contentsline {subsubsection}{Vertex Shader}{21}{section*.31}
+\contentsline {subsubsection}{Fragment Shader}{21}{section*.32}
 \contentsline {subsection}{\numberline {3.5.3}Motion Trajectory Path Shader}{21}{subsection.3.5.3}
 \contentsline {subsubsection}{Buffers \& Attributes}{21}{section*.33}
-\contentsline {subsubsection}{Vertex Shader}{21}{section*.34}
+\contentsline {subsubsection}{Vertex Shader}{22}{section*.34}
 \contentsline {subsubsection}{Fragment Shader}{22}{section*.35}
 \contentsline {section}{\numberline {3.6}Storage Requirement Reduction}{22}{section.3.6}
-\contentsline {subsection}{\numberline {3.6.1}Motionless Pixels}{22}{subsection.3.6.1}
-\contentsline {subsection}{\numberline {3.6.2}Elision of $z$ Coordinate}{22}{subsection.3.6.2}
-\contentsline {chapter}{\numberline {4}Mathematics}{23}{chapter.4}
-\contentsline {section}{\numberline {4.1}Coordinate Systems}{23}{section.4.1}
-\contentsline {subsection}{\numberline {4.1.1}Video (Pixel) Space}{23}{subsection.4.1.1}
-\contentsline {subsection}{\numberline {4.1.2}Normalized Texture Coordinates}{24}{subsection.4.1.2}
-\contentsline {subsection}{\numberline {4.1.3}Normalized Device Coordinates}{24}{subsection.4.1.3}
-\contentsline {subsection}{\numberline {4.1.4}DOM Space}{24}{subsection.4.1.4}
-\contentsline {section}{\numberline {4.2}Coordinate Transforms}{25}{section.4.2}
-\contentsline {subsubsection}{Pixel Space $\mathaccentV {vec}17E{p}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{26}{section*.36}
-\contentsline {subsubsection}{Normalized Device Coordinates $\mathaccentV {vec}17E{n}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{26}{section*.37}
-\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Video Space $\mathaccentV {vec}17E{v}$}{26}{section*.38}
-\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to DOM Space $\mathaccentV {vec}17E{d}$}{26}{section*.39}
-\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Normalized Device Coordinates $\mathaccentV {vec}17E{n}$}{26}{section*.40}
-\contentsline {section}{\numberline {4.3}Spatial Transforms}{26}{section.4.3}
-\contentsline {subsection}{\numberline {4.3.1}Scaling Matrices}{26}{subsection.4.3.1}
-\contentsline {subsection}{\numberline {4.3.2}Rotation Matrices}{26}{subsection.4.3.2}
-\contentsline {subsubsection}{Rotation About the $x$ Axis}{26}{section*.41}
-\contentsline {subsubsection}{Rotation About the $y$ Axis}{26}{section*.42}
-\contentsline {subsection}{\numberline {4.3.3}Projection Matrices}{27}{subsection.4.3.3}
-\contentsline {subsection}{\numberline {4.3.4}3D DMVN Matrices}{27}{subsection.4.3.4}
-\contentsline {subsubsection}{Transform Matrix}{27}{section*.43}
-\contentsline {subsubsection}{Application}{27}{section*.44}
-\contentsline {section}{\numberline {4.4}DMVN Interactivity}{28}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Rotating the Scene}{28}{subsection.4.4.1}
-\contentsline {subsection}{\numberline {4.4.2}Temporal Navigation}{28}{subsection.4.4.2}
-\contentsline {subsection}{\numberline {4.4.3}Path Pixel Selection}{29}{subsection.4.4.3}
-\contentsline {subsubsection}{Designing a Parametric Intersection Equation}{29}{section*.45}
-\contentsline {subsubsection}{Solving the Intersection Equation}{30}{section*.46}
-\contentsline {section}{\numberline {4.5}Paring of ``Unmoving" Paths}{31}{section.4.5}
-\contentsline {chapter}{\numberline {5}Conclusions}{32}{chapter.5}
-\contentsline {section}{\numberline {5.1}Observations}{32}{section.5.1}
-\contentsline {section}{\numberline {5.2}Dynamic Service Request-Time Test}{32}{section.5.2}
-\contentsline {section}{\numberline {5.3}Results}{33}{section.5.3}
-\contentsline {chapter}{\numberline {6}Future Work}{34}{chapter.6}
-\contentsline {section}{\numberline {6.1}Dynamic Web Server Implementation}{34}{section.6.1}
-\contentsline {section}{\numberline {6.2}Alternative Data Storage Methods}{34}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}Utilization of Video Compression}{34}{subsection.6.2.1}
-\contentsline {subsubsection}{Benefits}{34}{section*.47}
-\contentsline {subsubsection}{Detriments}{35}{section*.48}
-\contentsline {subsection}{\numberline {6.2.2}Blob Flow}{35}{subsection.6.2.2}
-\contentsline {section}{\numberline {6.3}Mobile Device Support}{35}{section.6.3}
-\contentsline {subsection}{\numberline {6.3.1}Fat Finger Problem}{35}{subsection.6.3.1}
-\contentsline {subsection}{\numberline {6.3.2}Motion Sensors}{35}{subsection.6.3.2}
-\contentsline {section}{\numberline {6.4}Optimization}{36}{section.6.4}
-\contentsline {subsection}{\numberline {6.4.1}Server Data Reduction}{36}{subsection.6.4.1}
-\contentsline {subsubsection}{Storage Format}{36}{section*.49}
-\contentsline {subsubsection}{Path Resolution}{36}{section*.50}
-\contentsline {subsection}{\numberline {6.4.2}Client Performance}{36}{subsection.6.4.2}
-\contentsline {section}{\numberline {6.5}Semantics \& Intuitiveness}{37}{section.6.5}
-\contentsline {subsection}{\numberline {6.5.1}Semantically Interesting Motion}{37}{subsection.6.5.1}
-\contentsline {subsubsection}{Incoherent Motion}{37}{section*.51}
-\contentsline {subsubsection}{Global Motion}{37}{section*.52}
-\contentsline {subsection}{\numberline {6.5.2}Immobile Regions}{38}{subsection.6.5.2}
-\contentsline {subsection}{\numberline {6.5.3}Camera Motion}{38}{subsection.6.5.3}
-\contentsline {subsection}{\numberline {6.5.4}Semantic Segmentation}{38}{subsection.6.5.4}
-\contentsline {subsection}{\numberline {6.5.5}Scene-Change Detection}{39}{subsection.6.5.5}
+\contentsline {subsection}{\numberline {3.6.1}Motionless Pixels}{23}{subsection.3.6.1}
+\contentsline {subsection}{\numberline {3.6.2}Elision of $z$ Coordinate}{23}{subsection.3.6.2}
+\contentsline {chapter}{\numberline {4}Mathematics}{24}{chapter.4}
+\contentsline {section}{\numberline {4.1}Coordinate Systems}{24}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Video (Pixel) Space}{24}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Normalized Texture Coordinates}{25}{subsection.4.1.2}
+\contentsline {subsection}{\numberline {4.1.3}Normalized Device Coordinates}{25}{subsection.4.1.3}
+\contentsline {subsection}{\numberline {4.1.4}DOM Space}{25}{subsection.4.1.4}
+\contentsline {section}{\numberline {4.2}Coordinate Transforms}{26}{section.4.2}
+\contentsline {subsubsection}{Pixel Space $\mathaccentV {vec}17E{p}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{27}{section*.36}
+\contentsline {subsubsection}{Normalized Device Coordinates $\mathaccentV {vec}17E{n}$ to Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$}{27}{section*.37}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Video Space $\mathaccentV {vec}17E{v}$}{27}{section*.38}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to DOM Space $\mathaccentV {vec}17E{d}$}{27}{section*.39}
+\contentsline {subsubsection}{Normalized Texture Coordinates $\mathaccentV {vec}17E{t}$ to Normalized Device Coordinates $\mathaccentV {vec}17E{n}$}{27}{section*.40}
+\contentsline {section}{\numberline {4.3}Spatial Transforms}{27}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Scaling Matrices}{27}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Rotation Matrices}{27}{subsection.4.3.2}
+\contentsline {subsubsection}{Rotation About the $x$ Axis}{27}{section*.41}
+\contentsline {subsubsection}{Rotation About the $y$ Axis}{28}{section*.42}
+\contentsline {subsection}{\numberline {4.3.3}Projection Matrices}{28}{subsection.4.3.3}
+\contentsline {subsection}{\numberline {4.3.4}3D DMVN Matrices}{28}{subsection.4.3.4}
+\contentsline {subsubsection}{Transform Matrix}{28}{section*.43}
+\contentsline {subsubsection}{Application}{28}{section*.44}
+\contentsline {section}{\numberline {4.4}Optical Flow}{29}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Bilinear Interpolation}{29}{subsection.4.4.1}
+\contentsline {section}{\numberline {4.5}DMVN Interactivity}{30}{section.4.5}
+\contentsline {subsection}{\numberline {4.5.1}Rotating the Scene}{30}{subsection.4.5.1}
+\contentsline {subsection}{\numberline {4.5.2}Temporal Navigation}{30}{subsection.4.5.2}
+\contentsline {subsection}{\numberline {4.5.3}Path Pixel Selection}{30}{subsection.4.5.3}
+\contentsline {subsubsection}{Designing a Parametric Intersection Equation}{31}{section*.45}
+\contentsline {subsubsection}{Solving the Intersection Equation}{32}{section*.46}
+\contentsline {section}{\numberline {4.6}Paring of Motionless Paths}{33}{section.4.6}
+\contentsline {chapter}{\numberline {5}Conclusions}{34}{chapter.5}
+\contentsline {section}{\numberline {5.1}Observations}{34}{section.5.1}
+\contentsline {section}{\numberline {5.2}Dynamic Service Request-Time Test}{34}{section.5.2}
+\contentsline {section}{\numberline {5.3}Results}{35}{section.5.3}
+\contentsline {chapter}{\numberline {6}Future Work}{36}{chapter.6}
+\contentsline {section}{\numberline {6.1}Dynamic Web Server Implementation}{36}{section.6.1}
+\contentsline {section}{\numberline {6.2}Alternative Data Storage Methods}{36}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}Utilization of Video Compression}{36}{subsection.6.2.1}
+\contentsline {subsubsection}{Benefits}{36}{section*.47}
+\contentsline {subsubsection}{Detriments}{37}{section*.48}
+\contentsline {subsection}{\numberline {6.2.2}Blob Flow}{37}{subsection.6.2.2}
+\contentsline {section}{\numberline {6.3}Mobile Device Support}{37}{section.6.3}
+\contentsline {subsection}{\numberline {6.3.1}Fat Finger Problem}{37}{subsection.6.3.1}
+\contentsline {subsection}{\numberline {6.3.2}Motion Sensors}{37}{subsection.6.3.2}
+\contentsline {section}{\numberline {6.4}Optimization}{38}{section.6.4}
+\contentsline {subsection}{\numberline {6.4.1}Server Data Reduction}{38}{subsection.6.4.1}
+\contentsline {subsubsection}{Storage Format}{38}{section*.49}
+\contentsline {subsubsection}{Path Resolution}{38}{section*.50}
+\contentsline {subsection}{\numberline {6.4.2}Client Performance}{38}{subsection.6.4.2}
+\contentsline {section}{\numberline {6.5}Semantics \& Intuitiveness}{39}{section.6.5}
+\contentsline {subsection}{\numberline {6.5.1}Semantically Interesting Motion}{39}{subsection.6.5.1}
+\contentsline {subsubsection}{Incoherent Motion}{39}{section*.51}
+\contentsline {subsubsection}{Global Motion}{40}{section*.52}
+\contentsline {subsection}{\numberline {6.5.2}Immobile Regions}{40}{subsection.6.5.2}
+\contentsline {subsection}{\numberline {6.5.3}Camera Motion}{40}{subsection.6.5.3}
+\contentsline {subsection}{\numberline {6.5.4}Semantic Segmentation}{40}{subsection.6.5.4}
+\contentsline {subsection}{\numberline {6.5.5}Scene-Change Detection}{41}{subsection.6.5.5}

@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     var dy = y - xformed_path[i][1];
                     const K = 0.9;
                     var dt = K * xformed_path[i][2];
-                    var dist_sq = first ? dx * dx + dy * dy : dx * dx + dy * dy + dt * dt;
+                    var dist_sq = first ? Math.sqrt(dx * dx + dy * dy) : Math.sqrt(dx * dx + dy * dy + dt * dt);
                     if (dist_sq < shortest_dist_sq) {
                         shortest_dist_sq = dist_sq;
                         closest = xformed_path[i][3];
